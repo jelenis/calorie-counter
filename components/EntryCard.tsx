@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import colors from '../styles/colors';
-
+import { cardShadow } from '../styles/card';
 type EntryCardProps = {
     data: {
         id: string;
@@ -33,11 +33,8 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         minWidth: 300,
         minHeight: 50,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
         elevation: 2,
+        ...cardShadow,
     },
     name: {
         fontSize: 18,

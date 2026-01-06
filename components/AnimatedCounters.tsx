@@ -90,7 +90,7 @@ export function AnimatedDoubleBuffer({
     }, [value, slideDistance, opacityDuration, slideDuration]);
 
     const bufferAStyle = useAnimatedStyle(() => ({
-        position: 'absolute',
+        position: 'relative',
         opacity: bufferAOpacity.value,
         transform: [{ translateY: bufferATranslateY.value }],
     }));
@@ -102,16 +102,17 @@ export function AnimatedDoubleBuffer({
     }));
 
     // Calculate character dimensions based on fontSize and fontWeight
+    // this keeps the container width consistent to prevent layout shifts during animation
     const fontSize = (textStyle as any)?.fontSize || 16;
     const fontWeight = (textStyle as any)?.fontWeight || '400';
 
     // Adjust width multiplier based on font weight 
     const weightMultiplier = ['bold', '700', '800', '900'].includes(String(fontWeight)) ? 0.7 : 0.6;
     const charWidth = fontSize * weightMultiplier;
-    const charHeight = fontSize * 1.2; // typical line height multiplier
+
 
     return (
-        <View style={[styles.container, { width: charWidth, height: charHeight }, containerStyle]}>
+        <View style={[styles.container, { width: charWidth, }, containerStyle]}>
             <Animated.View style={bufferAStyle}>
                 <Text style={textStyle}>
                     {bufferAValue.current}
@@ -128,7 +129,6 @@ export function AnimatedDoubleBuffer({
 
 const styles = StyleSheet.create({
     container: {
-        position: 'relative',
         alignItems: 'center',
     },
 });
