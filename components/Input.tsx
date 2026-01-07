@@ -9,6 +9,7 @@ export default function Input({ onChangeText = () => { }, ...rest }: { onChangeT
                     onChangeText(text);
                 }}
                 {...rest} />
+
         </View>
     );
 }
@@ -26,9 +27,9 @@ const styles = StyleSheet.create({
     },
     input: {
         width: '100%',
-        paddingVertical: 10,
+        paddingVertical: 6,
         paddingHorizontal: 15,
-        fontSize: 20,
+        fontSize: 16,
         borderWidth: 0,
         borderColor: 'transparent',
     },

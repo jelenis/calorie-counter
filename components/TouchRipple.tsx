@@ -1,15 +1,18 @@
-import { Pressable } from "react-native";
+import { Pressable, View } from "react-native";
 import React from "react";
 
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, cancelAnimation, type WithTimingConfig } from "react-native-reanimated";
+import Animated, {
+    useSharedValue, useAnimatedStyle, withTiming, cancelAnimation, type WithTimingConfig
+} from "react-native-reanimated";
 
-import type { GestureResponderEvent, PressableProps } from "react-native";
+import type { GestureResponderEvent, PressableProps, ViewStyle } from "react-native";
 
 interface TouchRippleProps {
     animationProps?: WithTimingConfig;
     children: React.ReactNode;
     onPressIn?: (e: GestureResponderEvent) => void;
     onPressOut?: (e: GestureResponderEvent) => void;
+    style: ViewStyle
     color?: string;
 }
 
@@ -19,6 +22,7 @@ export default function TouchRipple({
     onPressIn,
     onPressOut,
     color = 'white',
+    style = {},
     ...rest
 }: TouchRippleProps & PressableProps) {
     const [size, setSize] = React.useState({ width: 0, height: 0 });
@@ -64,11 +68,12 @@ export default function TouchRipple({
     }
 
     return (
+
         <Pressable
             onLayout={onLayout}
             onPressIn={onPressHandler}
             onPressOut={onPressOutHandler}
-            style={[{ flex: 1, justifyContent: 'center', alignItems: 'center', overflow: 'hidden', width: '100%' }, rest.style]}
+            style={[{ flex: 1, justifyContent: 'center', alignItems: 'center', overflow: 'hidden', width: '100%' }, style]}
             {...rest}
         >
             <Animated.View
@@ -84,5 +89,6 @@ export default function TouchRipple({
             />
             {children}
         </Pressable>
+
     );
 }
