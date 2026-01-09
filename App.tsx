@@ -15,6 +15,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 // Screen
 import HomeScreen from './screens/HomeScreen'
 import AddScreen from './screens/AddScreen';
+import colors from './styles/colors';
+import EditScreen from './screens/EditScreen';
 
 
 
@@ -45,9 +47,9 @@ function HomeStack() {
   return (
 
     <ModalStack.Navigator screenOptions={{ headerShown: false }}>
-      <ModalStack.Screen name="HomeMain" component={HomeScreen} />
+      <ModalStack.Screen name="HomeScreen" component={HomeScreen} />
       <ModalStack.Screen
-        name="AddModal"
+        name="AddScreen"
         options={{
           presentation: 'containedModal',
           animation: 'fade_from_bottom',
@@ -55,12 +57,18 @@ function HomeStack() {
         }}
         component={AddScreen}
       />
+      <ModalStack.Screen
+        name="EditScreen"
+        options={{
+          presentation: 'containedModal',
+          animation: 'fade',
+          animationDuration: 600,
+        }}
+        component={EditScreen}
+      />
     </ModalStack.Navigator>
   )
 }
-
-
-
 
 export default function App() {
   return (
@@ -78,6 +86,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.background,
   },
 });

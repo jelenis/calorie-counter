@@ -7,6 +7,8 @@ const colors = {
     textPrimary: lightBlue,
     textSecondary: darkGrey,
     textSubtle: '#6e6e6e',
+    ripple: '#cececeff',
+    background: '#F3F5F5',
 };
 
 export default colors;

@@ -141,20 +141,18 @@ export function AnimatedNumber({ calories = 0, textStyle, unit, unitStyle }: {
     unitStyle?: TextStyle
 }) {
 
-    function formatNumber(num: number) {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
 
-    const prevCalories = useRef(calories);
+    const prevCalories = useRef<number | null>(null);
+
     const caloriesStr = calories.toString();
-    const prevStr = prevCalories.current.toString();
-
+    const prevStr = prevCalories.current ? prevCalories.current.toString() : '';
     const elements = caloriesStr.split('').map((char, index) => {
         // Only animate if this digit changed
         const prevChar = prevStr[index] || '';
+        console.log(`Char at index ${index}: current=${char}, previous=${prevChar}`);
         return (
             <AnimatedDoubleBuffer
-                key={index}
+                key={`${index}_${char}`}
                 value={char}
                 textStyle={textStyle}
             />
@@ -164,10 +162,6 @@ export function AnimatedNumber({ calories = 0, textStyle, unit, unitStyle }: {
     useEffect(() => {
         prevCalories.current = calories;
     }, [calories]);
-
-    ;
-
-
 
     return (
         <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>

@@ -9,6 +9,7 @@ import useDebounce from '../hooks/useDebounce';
 export type SearchInputProps = {
     value: string;
     onChangeText: (text: string) => void;
+
     onBackPress: () => void;
     renderItem: (info: ListRenderItemInfo<any>) => React.ReactElement | null;
     data: any[];
@@ -23,7 +24,7 @@ export default function SearchInput({ data, renderItem, onChangeText, value, onB
     function AnimatedRow(itemData: ListRenderItemInfo<any>) {
         return (
             <Animated.View layout={LinearTransition}>
-                {renderItem(itemData)}
+                {renderItem({ ...itemData })}
             </Animated.View>
         );
     }

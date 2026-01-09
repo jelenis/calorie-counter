@@ -1,23 +1,20 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import colors from '../styles/colors';
 import { cardShadow } from '../styles/card';
+import { FoodEntry } from '../utils/db';
 type EntryCardProps = {
-    data: {
-        id: string;
-        name: string;
-        calories: number;
-        stats?: number;
-    }
+    data: FoodEntry
+    onPress: () => void
 }
 
-export default function EntryCard({ data }: EntryCardProps) {
-    const { name, calories, stats } = data;
+export default function EntryCard({ data, onPress }: EntryCardProps) {
+    const { name, calories } = data;
     return (
-        <Pressable style={styles.container}>
+        <Pressable onPress={onPress} style={styles.container}>
             <Text style={styles.name}>{name.slice(0, 20)}</Text>
             <View style={styles.bottomRow}>
                 <Text style={styles.calories}>{calories} cal</Text>
-                <Text style={styles.stats}>{stats}%</Text>
+                <Text style={styles.stats}>{''}%</Text>
             </View>
         </Pressable>
     )

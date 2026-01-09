@@ -1,4 +1,5 @@
-export type Food = { id: string; name: string };
+import type { FoodEntry } from "../utils/db";
+
 
 export type RootTabParamList = {
     Home: undefined;
@@ -6,10 +7,11 @@ export type RootTabParamList = {
 
 export type RootStackParamList = {
     Main: undefined;
-    AddModal: { data: Food[] } | undefined;
+    AddModal: { data: FoodEntry[] } | undefined;
 };
 
 export type ModalStackParamList = {
-    HomeMain: undefined;
-    AddModal: { data: Food[] } | undefined;
+    HomeScreen: { foodEntry?: FoodEntry } | undefined;
+    AddScreen: { dateStr: Date } | undefined;
+    EditScreen: { id: number } | undefined;
 };

@@ -10,7 +10,6 @@ export default function TotalCalories({ calories = 0 }) {
     function formatNumber(num: number) {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
-
     return (
 
         <AnimatedNumber

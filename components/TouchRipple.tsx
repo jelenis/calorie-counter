@@ -12,7 +12,7 @@ interface TouchRippleProps {
     children: React.ReactNode;
     onPressIn?: (e: GestureResponderEvent) => void;
     onPressOut?: (e: GestureResponderEvent) => void;
-    style: ViewStyle
+    style?: ViewStyle
     color?: string;
 }
 

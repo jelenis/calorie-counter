@@ -3,50 +3,91 @@ import { View, Text, StyleSheet, Button, TextInput, FlatList } from 'react-nativ
 import EntryCard from '../components/EntryCard';
 import Header from '../components/Header';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState, useEffect, useCallback } from 'react';
+
 import colors from '../styles/colors';
 import AddButton from '../components/AddButton';
 import ProgressBar from '../components/ProgressBar';
+import TotalCalories from '../components/TotalCalories';
+import { getEntriesByDate, FoodEntry, getDayKey } from '../utils/db';
+import { useFocusEffect } from '@react-navigation/native';
+import { SectionList } from 'react-native';
 
-const entries = [
-    { id: '1', name: 'Breakfast', calories: 450, stats: 23 },
-    { id: '2', name: 'Lunch', calories: 600, stats: 31 },
-    { id: '3', name: 'Dinner', calories: 500, stats: 26 },
-    { id: '4', name: 'Snack', calories: 150, stats: 8 },
-    { id: '5', name: 'Coffee', calories: 50, stats: 3 },
-    { id: '6', name: 'Protein Bar', calories: 200, stats: 10 },
-    { id: '7', name: 'Salad', calories: 350, stats: 18 },
-    { id: '8', name: 'Apple', calories: 95, stats: 5 },
-    { id: '9', name: 'Pasta', calories: 550, stats: 28 },
-    { id: '10', name: 'Yogurt', calories: 120, stats: 6 },
-    { id: '11', name: 'Sandwich', calories: 400, stats: 21 },
-];
-function EntryList() {
+
+type SectionProp = {
+    category: string;
+    data: FoodEntry[];
+};
+
+function EntryList({ sections, onPress }: { sections: SectionProp[], onPress: (id: number) => void }) {
+
+    const renderItem = useCallback(({ item }:
+        { item: FoodEntry }) => (
+        <EntryCard data={item} onPress={() => {
+            // call onPress with item id
+            onPress(item.id);
+        }} />
+    ), [sections, onPress]);
 
     return (
-        <FlatList
+        <SectionList
             showsVerticalScrollIndicator={false}
             style={{ flex: 1, marginTop: 20 }}
+            sections={sections}
 
-            data={entries}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-                <EntryCard key={item.id} data={item} />
+            keyExtractor={(item: any) => item.id}
+            ListHeaderComponentStyle={{ backgroundColor: colors.background }}
+            renderItem={renderItem}
+            renderSectionHeader={({ section }:
+                { section: SectionProp }) => (
+                <Text style={styles.sectionHeader}>
+                    {section.category}
+                </Text>
             )}
         />
 
     );
 }
 
-import { useState } from 'react';
-import TotalCalories from '../components/TotalCalories';
-export default function HomeScreen({ navigation }: { navigation: any }) {
-    const [calories, setCalories] = useState(1325);
-    const dailyGoal = 2000;
+function groupByMeal(rows: FoodEntry[]): { category: string; data: FoodEntry[] }[] {
+    return [
+        { category: 'Breakfast', data: rows.filter(e => e.category === 'breakfast'), },
+        { category: 'Lunch', data: rows.filter(e => e.category === 'lunch'), },
+        { category: 'Dinner', data: rows.filter(e => e.category === 'dinner'), },
+        { category: 'Snacks', data: rows.filter(e => e.category === 'snack'), },
+    ];
+}
 
-    function onPressHandler() {
-        setCalories(prev => Math.floor(prev + Math.random() * 400));
-        navigation.navigate('AddModal', { data: entries });
-    }
+
+
+export default function HomeScreen({ navigation, params }: { navigation: any; params?: { foodEntry?: FoodEntry } }) {
+    const [entries, setEntries] = useState<any[]>([]);
+    const [currentDate, setCurrentDate] = useState(() => new Date());
+
+
+    const fetchCaloriesForToday = useCallback(async () => {
+        console.log('Fetching entries for date:', currentDate);
+        try {
+            const entries = await getEntriesByDate(currentDate);
+            setEntries(entries);
+        } catch (e) {
+            console.error('Error fetching entries:', e);
+        }
+    }, [currentDate]);
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchCaloriesForToday();
+            console.log("Screen focused, entries updated.");
+
+        }, [fetchCaloriesForToday])
+    );
+
+    const dailyGoal = 2000;
+    const calories = entries.reduce((total, entry) => total + entry.calories, 0);
+    const groupedEntries = groupByMeal(entries);
+
+    console.log(groupedEntries)
 
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']} >
@@ -54,11 +95,16 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             <View style={{ marginBottom: '3%' }}>
                 <TotalCalories calories={calories} />
             </View>
+            {/*  main container */}
             <View style={styles.innerContainer}>
                 <ProgressBar progress={(calories / dailyGoal) * 100} />
-                <EntryList />
+                <EntryList sections={groupedEntries} onPress={(id: number) => navigation.navigate('EditScreen', { id })} />
             </View>
-            <AddButton onPress={onPressHandler} />
+
+            {/* Floating add button  */}
+            <AddButton onPress={() => navigation.navigate('AddScreen', {
+                dateStr: getDayKey(currentDate)
+            })} />
         </SafeAreaView>
     )
 }
@@ -68,6 +114,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         width: '100%',
+        backgroundColor: colors.background,
     },
     innerContainer: {
         flex: 1,
@@ -82,5 +129,15 @@ const styles = StyleSheet.create({
     },
     calorieTextUnit: {
         fontSize: 40
+    },
+    sectionHeader: {
+        fontWeight: 'bold',
+        flex: 1,
+        fontSize: 18,
+        backgroundColor: colors.background,
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+
     }
+
 })
