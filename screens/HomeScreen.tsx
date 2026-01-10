@@ -122,7 +122,8 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
         newDate.setDate(newDate.getDate() + days);
         return newDate;
     }
-    console.log('currentDate:', currentDate);
+    const hasEntries = entries.length > 0;
+    console.log('currentDate:', hasEntries, currentDate.toDateString(), entries.length);
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']} >
             <Header
@@ -134,25 +135,36 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
                 }}
                 forwardDisabled={currentDate < new Date()}
                 date={currentDate} />
-            <View style={{ marginBottom: '3%' }}>
-                <TotalCalories calories={Math.min(Math.round(calories), 99999)} />
-            </View>
-            {/*  main container */}
-            <View style={styles.innerContainer}>
-                <ProgressBar progress={(calories / dailyGoal) * 100} />
-                <EntryList
-                    sections={groupedEntries}
-                    onPress={(id: number) => {
-                        const entry = entries.find(e => e.id === id) || null;
-                        setSelectedItem(entry);
-                        setModalVisible(true);
-                    }}
-                    onDelete={(id: number) => {
-                        // open confirmation modal before deleting
-                        // todo make a gesture swipe to delete
-                    }}
-                />
-            </View>
+            {/* total calories */}
+            {hasEntries ? (
+                <>
+                    <Animated.View exiting={FadeOut} entering={FadeIn} style={{ marginBottom: '3%' }}>
+                        <TotalCalories calories={Math.min(Math.round(calories), 99999)} />
+                    </Animated.View>
+                    {/*  main container */}
+                    <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.innerContainer}>
+                        <ProgressBar progress={(calories / dailyGoal) * 100} />
+                        <EntryList
+                            sections={groupedEntries}
+                            onPress={(id: number) => {
+                                const entry = entries.find(e => e.id === id) || null;
+                                setSelectedItem(entry);
+                                setModalVisible(true);
+                            }}
+                            onDelete={(id: number) => {
+                                // open confirmation modal before deleting
+                                // todo make a gesture swipe to delete
+                            }}
+                        />
+                    </Animated.View>
+                </>
+            ) : (
+                <Animated.View entering={FadeIn} exiting={FadeOut} style={{ justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
+                    <Text style={{ fontSize: 16, color: colors.textSubtle, textAlign: 'center', lineHeight: 24 }}>
+                        No entries for this day.{"\n"}Tap + to add.
+                    </Text>
+                </Animated.View>
+            )}
 
             {/* Floating add button  */}
             <AddButton onPress={() => navigation.navigate('AddScreen', {
