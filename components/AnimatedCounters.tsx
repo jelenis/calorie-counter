@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import Animated, { useSharedValue, withTiming, useAnimatedStyle, SharedValue, withDelay, SlideInDown, SlideOutUp } from 'react-native-reanimated';
+import Animated, { useSharedValue, withTiming, useAnimatedStyle, SharedValue, withDelay, SlideInDown, SlideOutUp, LinearTransition } from 'react-native-reanimated';
 import { useEffect, useLayoutEffect, useRef, ReactNode, Children, useMemo, useState } from 'react';
 
 /**
@@ -156,12 +156,14 @@ const styles = StyleSheet.create({
  * 
  * 
  */
-function AnimatedDigit({ char, prevChar, textStyle, delay = 0, duration = 350 }: { char: string; prevChar?: string; textStyle?: TextStyle; delay?: number; duration?: number }) {
+function AnimatedDigit({ char, prevChar, textStyle, delay = 0, duration = 700 }: { char: string; prevChar?: string; textStyle?: TextStyle; delay?: number; duration?: number }) {
     const fontSize = (textStyle as any)?.fontSize || 16;
     const fontWeight = (textStyle as any)?.fontWeight || '400';
+    const letterSpacing = (textStyle as any)?.letterSpacing || 0;
     const weightMultiplier = ['bold', '700', '800', '900'].includes(String(fontWeight)) ? 0.7 : 0.6;
-    const charWidth = fontSize * weightMultiplier;
-    const lineHeight = (textStyle as any)?.lineHeight || Math.round(fontSize * 1.2);
+    const lineHeightBase = (textStyle as any)?.lineHeight || fontSize * 1.2;
+    const lineHeight = Math.round(lineHeightBase);
+    const charWidth = fontSize * weightMultiplier + letterSpacing;
 
     const prevOpacity = useSharedValue(1);
     const prevTranslateY = useSharedValue(0);
@@ -170,7 +172,7 @@ function AnimatedDigit({ char, prevChar, textStyle, delay = 0, duration = 350 }:
 
     // everytime this changes, run the animation, parent is in charge of providing prevChar
     // we just animate prevChar up and out, and char in from below
-    useEffect(() => {
+    useLayoutEffect(() => {
         const same = (prevChar ?? char) === char;
         if (same) {
             // Show only current char
@@ -192,8 +194,8 @@ function AnimatedDigit({ char, prevChar, textStyle, delay = 0, duration = 350 }:
         nextTranslateY.value = lineHeight; // push below
 
         const slideDur = duration;
-        const fadeOutDur = Math.max(80, Math.floor(duration * 0.5));
-        const fadeInDur = Math.max(80, Math.floor(duration * 0.6));
+        const fadeOutDur = duration / 2;
+        const fadeInDur = duration / 2;
 
         prevOpacity.value = withDelay(delay, withTiming(0, { duration: fadeOutDur }));
         prevTranslateY.value = withDelay(delay, withTiming(-lineHeight, { duration: slideDur }));
@@ -203,13 +205,17 @@ function AnimatedDigit({ char, prevChar, textStyle, delay = 0, duration = 350 }:
     }, [char, prevChar, delay, duration, lineHeight]);
 
     const prevStyle = useAnimatedStyle(() => ({
-        position: 'relative',
+        position: 'absolute',
+        top: 0,
+        left: 0,
         opacity: prevOpacity.value,
         transform: [{ translateY: prevTranslateY.value }],
     }));
 
     const nextStyle = useAnimatedStyle(() => ({
         position: 'absolute',
+        top: 0,
+        left: 0,
         opacity: nextOpacity.value,
         transform: [{ translateY: nextTranslateY.value }],
     }));
@@ -217,12 +223,12 @@ function AnimatedDigit({ char, prevChar, textStyle, delay = 0, duration = 350 }:
     return (
         <View style={{ overflow: 'hidden', height: lineHeight, width: charWidth, alignItems: 'center' }}>
             <Animated.View style={prevStyle}>
-                <Text style={[textStyle, (prevChar === ' ' || prevChar === undefined) && { opacity: 0 }]}>
+                <Text style={[textStyle, { lineHeight }, (prevChar === ' ' || prevChar === undefined) && { opacity: 0 }]}>
                     {prevChar ?? char}
                 </Text>
             </Animated.View>
             <Animated.View style={nextStyle}>
-                <Text style={[textStyle, char === ' ' && { opacity: 0 }]}>
+                <Text style={[textStyle, { lineHeight }, char === ' ' && { opacity: 0 }]}>
                     {char}
                 </Text>
             </Animated.View>
@@ -248,16 +254,16 @@ export function AnimatedNumber({ calories = 0, textStyle, unit, unitStyle, updat
         return () => clearTimeout(t);
     }, [calories, updateDelay]);
 
-    console.log(displayedCalories)
+
     const elements = useMemo(() => {
         const currentStr = displayedCalories.toString();
         const prevBase = (prevCalories.current ?? displayedCalories).toString();
-        const maxLen = Math.max(currentStr.length, prevBase.length);
+        const maxLen = currentStr.length;
 
         // add padding so new digits appear on the right
         // in the correct position
-        const currStrPadded = currentStr.padStart(maxLen, ' ');
-        const prevStrPadded = prevBase.padStart(maxLen, ' ');
+        const currStrPadded = currentStr.padEnd(maxLen, ' ');
+        const prevStrPadded = prevBase.padEnd(maxLen, ' ');
 
         // Right-align digits and animate per position
         return currStrPadded.split('').map((char, index) => (
@@ -265,7 +271,8 @@ export function AnimatedNumber({ calories = 0, textStyle, unit, unitStyle, updat
                 key={index}
                 char={char}
                 prevChar={prevStrPadded[index] ?? ' '}
-                textStyle={textStyle} delay={index * 10} />
+                textStyle={textStyle}
+                delay={0} />
         ));
 
     }, [displayedCalories, textStyle]);
@@ -275,10 +282,14 @@ export function AnimatedNumber({ calories = 0, textStyle, unit, unitStyle, updat
     }, [displayedCalories]);
 
     return (
-        <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-            {elements}
-            {unit !== undefined && <Text style={unitStyle}>{unit}</Text>}
-        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center' }}>
+
+            <View style={{ flexDirection: 'row' }} >{elements}</View>
+
+            {unit !== undefined &&
+                <Animated.Text layout={LinearTransition} style={[unitStyle,]}>{unit}</Animated.Text>
+            }
+        </View >
     );
 }
 

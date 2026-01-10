@@ -70,7 +70,7 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
     const [currentDate, setCurrentDate] = useState(() => new Date());
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState<FoodEntry | null>(null);
-
+    const [testCount, setTestCount] = useState(0);
     const fetchCaloriesForToday = useCallback(async () => {
         console.log('Fetching entries for date:', currentDate);
         try {
@@ -117,7 +117,7 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']} >
             <Header />
             <View style={{ marginBottom: '3%' }}>
-                <TotalCalories calories={Math.min(Math.round(calories), 999999)} />
+                <TotalCalories calories={Math.min(Math.round(calories), 99999)} />
             </View>
             {/*  main container */}
             <View style={styles.innerContainer}>
@@ -141,6 +141,10 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
                 dateStr: db.getDayKey(currentDate)
             })} />
 
+            {/* test button */}
+            <Button title="Test" onPress={() => setTestCount(Math.random() * 1000)} />
+
+            {/* Add Entry Menu Modal */}
             <Menu modalVisible={modalVisible} setModalVisible={setModalVisible}>
                 <AddEntryMenu
                     selectedItem={selectedItem}
@@ -187,7 +191,3 @@ const styles = StyleSheet.create({
     }
 
 })
-
-function deleteFoodEntry(id: number) {
-    throw new Error('Function not implemented.');
-}
