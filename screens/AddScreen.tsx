@@ -1,146 +1,164 @@
 import type { ListRenderItemInfo } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { ModalStackParamList } from '../types/navigation';
 
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, FlatList, Platform, Modal } from 'react-native';
-import Animated, { useSharedValue, LinearTransition, } from 'react-native-reanimated';
+import AddEntryMenu from '../components/AddEntryMenu';
+
+
 import colors from '../styles/colors';
 import TouchRipple from '../components/TouchRipple';
-import Entypo from '@expo/vector-icons/Entypo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SearchInput from '../components/SearchInput';
-import { insertEntry, type FoodEntry } from '../utils/db';
+import { insertEntry, type FoodEntry, type Food } from '../utils/db';
+import Menu from '../components/Menu';
+import type { ModalStackParamList } from '../types/navigation';
+
 
 type Props = NativeStackScreenProps<ModalStackParamList, 'AddScreen'>;
 
 
-type SampleFoodEntry = Omit<FoodEntry, 'category'>;
+const sampleFoodEntries: Food[] = [
+    {
+        "id": 1,
+        "upc": "1633636543505",
+        "name": "Granola, Cinnamon Raisin",
+        "brand": "Michele's",
+        "category": "Cereal",
+        "serving_size_g": 28,
+        "serving_text": "1/4 cup (28 g)",
+        "calories": 5.0,
+        "protein": 0.1071,
+        "fat": 0.25,
+        "carbs": 0.5714
+    },
+    {
+        "id": 2,
+        "upc": "070470004387",
+        "name": "Greek Yogurt, Plain, Non-Fat",
+        "brand": "Chobani",
+        "category": "Dairy",
+        "serving_size_g": 170,
+        "serving_text": "3/4 cup (170 g)",
 
-const sampleFoodEntries: SampleFoodEntry[] = [
-    { id: 1, name: "Oatmeal", calories: 300, protein: 10, carbs: 54, fat: 6 },
-    { id: 2, name: "Banana", calories: 105, carbs: 27 },
-    { id: 3, name: "Scrambled eggs (2)", calories: 180, protein: 12, fat: 14 },
-    { id: 4, name: "Whole wheat toast", calories: 120, protein: 5, carbs: 22, fat: 2 },
-    { id: 5, name: "Peanut butter (1 tbsp)", calories: 95, protein: 4, fat: 8, carbs: 3 },
+        "calories": 0.5294,
+        "protein": 0.0941,
+        "fat": 0.0,
+        "carbs": 0.0353
+    },
+    {
+        "id": 3,
+        "upc": "051500255352",
+        "name": "Peanut Butter, Creamy",
+        "brand": "Jif",
+        "category": "Nut Butter",
+        "serving_size_g": 32,
+        "serving_text": "2 tbsp (32 g)",
 
-    { id: 6, name: "Chicken breast", calories: 220, protein: 41, fat: 5 },
-    { id: 7, name: "Brown rice (1 cup)", calories: 215, protein: 5, carbs: 45, fat: 2 },
-    { id: 8, name: "Steamed broccoli", calories: 55, protein: 4, carbs: 11 },
-    { id: 9, name: "Olive oil (1 tbsp)", calories: 120, fat: 14 },
 
-    { id: 10, name: "Greek yogurt (plain)", calories: 130, protein: 23, carbs: 9, fat: 0 },
-    { id: 11, name: "Blueberries", calories: 85, carbs: 21 },
-    { id: 12, name: "Protein bar", calories: 220, protein: 20, carbs: 23, fat: 7 },
+        "calories": 0.59375,
+        "protein": 0.2188,
+        "fat": 0.5,
+        "carbs": 0.25
+    },
+    {
+        "id": 4,
+        "upc": "0000000004017",
+        "name": "Apple, Raw, With Skin",
+        "brand": "Heinz",
+        "category": "Fruit",
+        "serving_size_g": 182,
+        "serving_text": "1 medium (182 g)",
 
-    { id: 13, name: "Turkey sandwich", calories: 420, protein: 32, carbs: 38, fat: 12 },
-    { id: 14, name: "Apple", calories: 95, carbs: 25 },
-    { id: 15, name: "Almonds (28g)", calories: 165, protein: 6, fat: 14, carbs: 6 },
 
-    { id: 16, name: "Salmon fillet", calories: 360, protein: 34, fat: 22 },
-    { id: 17, name: "Quinoa (1 cup)", calories: 222, protein: 8, carbs: 39, fat: 4 },
-    { id: 18, name: "Roasted vegetables", calories: 140, carbs: 18, fat: 6 },
+        "calories": 0.522,
+        "protein": 0.0027,
+        "fat": 0.0016,
+        "carbs": 0.1374
+    },
+    {
+        "id": 5,
+        "upc": "023700162049",
+        "name": "Chicken Breast, Boneless, Skinless",
+        "brand": "Maple Leaf",
+        "category": "Meat",
+        "serving_size_g": 120,
+        "serving_text": "1 breast (120 g)",
 
-    { id: 19, name: "Cheeseburger", calories: 520, protein: 28, carbs: 42, fat: 28 },
-    { id: 20, name: "French fries (medium)", calories: 340, carbs: 44, fat: 16 },
 
-    { id: 21, name: "Cottage cheese", calories: 110, protein: 14, carbs: 5, fat: 4 },
-    { id: 22, name: "Orange", calories: 80, carbs: 19 },
+        "calories": 1.65,
+        "protein": 0.3083,
+        "fat": 0.0333,
+        "carbs": 0.0
+    }
+]
 
-    { id: 23, name: "Pasta with tomato sauce", calories: 480, protein: 16, carbs: 82, fat: 10 },
-    { id: 24, name: "Garlic bread", calories: 180, carbs: 24, fat: 7 },
-
-    { id: 25, name: "Ice cream (1 scoop)", calories: 210, carbs: 24, fat: 11 },
-    { id: 26, name: "Dark chocolate (2 squares)", calories: 120, fat: 9, carbs: 12 },
-
-    { id: 27, name: "Protein shake", calories: 250, protein: 30, carbs: 12, fat: 5 },
-    { id: 28, name: "Avocado (half)", calories: 160, fat: 15, carbs: 8 },
-    { id: 29, name: "Tuna salad", calories: 310, protein: 26, fat: 18 },
-    { id: 30, name: "Rice cakes (2)", calories: 70, carbs: 14 },
-];
+type EmptyFoodEntry = Partial<FoodEntry>;
 
 export default function AddScreen({ route, navigation }: Props) {
-    const data: SampleFoodEntry[] = sampleFoodEntries;
-    const colorProgress = useSharedValue(0);
+
     const insets = useSafeAreaInsets();
     const [value, setValue] = React.useState('');
     const [modalVisible, setModalVisible] = React.useState(false);
-
+    const [selectedItem, setSelectedItem] = React.useState<Food | null>(null);
     function handleChangeText(text: string) {
         setValue(text);
         // Add any additional logic here
     }
 
+    const data: EmptyFoodEntry[] = sampleFoodEntries.map(({ id, ...rest }) => (
+        { ...rest, food_id: id }
+    ));
+
     function handleBackPress() {
         navigation.goBack();
     }
 
-
-    function onPressHandler({ item }: { item: SampleFoodEntry }) {
+    async function addFoodEntry(item: Partial<FoodEntry>) {
         if (route.params?.dateStr) {
             try {
-                insertEntry(route.params.dateStr, item.name, item.calories, 'snack');
+                await insertEntry(route.params.dateStr, item as FoodEntry);
             } catch (e) {
                 console.error('Error inserting entry:', e);
             }
         }
+
+    }
+
+
+    function onPressHandler({ item }: ListRenderItemInfo<Food>) {
+        setSelectedItem(item);
         setModalVisible(true);
-        // navigation.goBack(); // TODO make a confirmation message (probably stay on screen)
     }
 
     return (
-        <View style={[styles.container, insets]}>
+        <>
+            <View style={[styles.container, insets]}>
+                <SearchInput
+                    data={data}
+                    value={value}
+                    onChangeText={handleChangeText}
+                    onBackPress={handleBackPress}
+                    renderItem={(info) => (
+                        <AutoCompleteSuggestion
+                            item={info.item}
+                            index={info.index}
+                            onPress={() => onPressHandler(info)}
+                        />
+                    )}
+                    placeholder='Search for food items...'
+                    keyExtractor={(item) => item.food_id?.toString()}
+                />
+            </View>
+            <Menu modalVisible={modalVisible} setModalVisible={setModalVisible}>
+                <AddEntryMenu
+                    selectedItem={selectedItem}
+                    setModalVisible={setModalVisible}
+                    addFoodEntry={addFoodEntry}
 
-            <SearchInput
-                data={data}
-                value={value}
-                onChangeText={handleChangeText}
-                onBackPress={handleBackPress}
-                renderItem={({ item, index }) => (
-                    <AutoCompleteSuggestion
-                        item={item}
-                        index={index}
-                        onPress={() => onPressHandler({ item })}
-                    />
-                )}
-                placeholder='Search for food items...'
-            />
-            <Modal
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
-                transparent
-                animationType="fade"
-            >
-                <View style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                }}>
-                    <View style={{
-                        width: '80%',
-                        padding: 20,
-                        backgroundColor: 'white',
-                        borderRadius: 10,
-                        alignItems: 'center',
-                    }}>
-                        <Text style={{ fontSize: 18, marginBottom: 20 }}>Food item added successfully!</Text>
-                        <TouchRipple
-                            onPress={() => setModalVisible(false)}
-                            color={colors.ripple}
-                            style={{
-                                paddingVertical: 10,
-                                paddingHorizontal: 20,
-                                backgroundColor: colors.primary,
-                                borderRadius: 5,
-                            }}
-                        >
-                            <Text style={{ color: 'white', fontSize: 16 }}>OK</Text>
-                        </TouchRipple>
-                    </View>
-                </View>
-            </Modal>
-        </View>
+                />
+            </Menu>
+        </>
     );
 }
 
@@ -149,11 +167,15 @@ function AutoCompleteSuggestion({ item, index, onPress }: { item: any; index: nu
         <View
             style={[styles.suggestionContainer, index === 0 ? { borderTopWidth: 1, borderTopColor: '#EEE' } : {}]}>
             <TouchRipple onPress={onPress} color={colors.ripple} style={styles.suggestionTextContainer}>
-                <Text style={styles.suggestionText}>{item.name}</Text>
+                <Text style={styles.name}>{item.name}</Text>
+                {item.brand && <Text style={styles.brand}>{item.brand}</Text>}
+                {item.calories && <Text style={styles.calories}>{(item.calories * item.serving_size_g).toFixed(0)} Cal</Text>}
             </TouchRipple >
         </View >
     );
 }
+
+
 
 
 
@@ -164,7 +186,7 @@ const styles = StyleSheet.create({
         width: '100%',
         maxWidth: 600,
         alignItems: 'center',
-        marginTop: Platform.OS === 'ios' ? 0 : 20,
+        marginTop: Platform.OS === 'ios' ? 10 : 20,
     },
     suggestionContainer: {
         flex: 1,
@@ -181,10 +203,19 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'flex-start',
     },
-    suggestionText: {
+    name: {
         fontSize: 18,
         color: colors.textPrimary,
 
+    },
+    brand: {
+        fontSize: 14,
+        color: colors.textSubtle,
+    },
+    calories: {
+        fontSize: 14,
+        color: colors.textSubtle,
+        marginTop: 4,
     },
     searchContainer: {
         flexDirection: 'row',
@@ -198,6 +229,12 @@ const styles = StyleSheet.create({
         marginTop: 10,
         width: '100%',
         flex: 1,
-    }
+    },
+    confirmButton: {
+        // backgroundColor: colors.success,
+    },
+    cancelButton: {
+        backgroundColor: colors.error,
+    },
 
 }); 

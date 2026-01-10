@@ -9,16 +9,18 @@ import useDebounce from '../hooks/useDebounce';
 export type SearchInputProps = {
     value: string;
     onChangeText: (text: string) => void;
-
     onBackPress: () => void;
     renderItem: (info: ListRenderItemInfo<any>) => React.ReactElement | null;
     data: any[];
+    keyExtractor?: (item: any, index: number) => string;
     placeholder?: string;
 } & TextInput['props'];
 
-export default function SearchInput({ data, renderItem, onChangeText, value, onBackPress, placeholder = 'Search...', ...rest }: SearchInputProps) {
+const DEBOUNCE_TIME = 200;
 
-    const debouncedValue = useDebounce(value, 200);
+export default function SearchInput({ data, keyExtractor = (item) => item.id, renderItem, onChangeText, value, onBackPress, placeholder = 'Search...', ...rest }: SearchInputProps) {
+
+    const debouncedValue = useDebounce(value, DEBOUNCE_TIME);
     useEffect(() => onChangeText(debouncedValue), [debouncedValue]);
 
     function AnimatedRow(itemData: ListRenderItemInfo<any>) {
@@ -52,7 +54,7 @@ export default function SearchInput({ data, renderItem, onChangeText, value, onB
                 style={styles.resultsList}
                 data={filteredData}
                 renderItem={AnimatedRow}
-                keyExtractor={(item) => item.id}
+                keyExtractor={keyExtractor}
             />
         </>
     );

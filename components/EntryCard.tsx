@@ -2,19 +2,30 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import colors from '../styles/colors';
 import { cardShadow } from '../styles/card';
 import { FoodEntry } from '../utils/db';
+import AntDesign from '@expo/vector-icons/AntDesign';
+
 type EntryCardProps = {
     data: FoodEntry
+    onDelete: () => void
     onPress: () => void
 }
 
-export default function EntryCard({ data, onPress }: EntryCardProps) {
-    const { name, calories } = data;
+export default function EntryCard({ data, onPress, onDelete }: EntryCardProps) {
+    const { name, calories, protein, fat, carbs, brand, quantity } = data;
     return (
         <Pressable onPress={onPress} style={styles.container}>
-            <Text style={styles.name}>{name.slice(0, 20)}</Text>
-            <View style={styles.bottomRow}>
-                <Text style={styles.calories}>{calories} cal</Text>
-                <Text style={styles.stats}>{''}%</Text>
+            <Text style={styles.name}>{name.slice(0, 40)}</Text>
+            <View style={styles.row}>
+                <Text style={styles.brand}>{brand}</Text>
+                <Text style={styles.brand}>{Math.round(quantity)} g</Text>
+            </View>
+            <View style={styles.row}>
+                <Text style={styles.calories}>{Math.round(calories * quantity)} Cal</Text>
+                {/* <View style={styles.stats}>
+                    <Text style={styles.nutrient}>{Math.round(protein * quantity)} g</Text>
+                    <Text style={styles.nutrient}>{Math.round(fat * quantity)} g</Text>
+                    <Text style={styles.nutrient}>{Math.round(carbs * quantity)} g</Text>
+                </View> */}
             </View>
         </Pressable>
     )
@@ -33,21 +44,32 @@ const styles = StyleSheet.create({
         elevation: 2,
         ...cardShadow,
     },
+
     name: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '500',
         marginBottom: 4,
     },
-    bottomRow: {
+    row: {
         flexDirection: 'row',
-        justifyContent: 'flex-start',
+        justifyContent: 'space-between',
+        marginBottom: 10
     },
     stats: {
         marginLeft: 10,
         color: colors.textSubtle,
+        flexDirection: 'row',
+        gap: 15,
+    },
+    brand: {
+        color: colors.textSubtle,
     },
     calories: {
+        fontWeight: '600',
+        color: colors.textSecondary,
+    },
+    nutrient: {
         fontWeight: '400',
-        color: colors.textSubtle,
+        color: colors.textPrimary,
     }
 })

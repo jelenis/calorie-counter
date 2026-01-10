@@ -12,7 +12,7 @@ interface TouchRippleProps {
     children: React.ReactNode;
     onPressIn?: (e: GestureResponderEvent) => void;
     onPressOut?: (e: GestureResponderEvent) => void;
-    style?: ViewStyle
+    style?: ViewStyle | ViewStyle[];
     color?: string;
 }
 
@@ -73,7 +73,7 @@ export default function TouchRipple({
             onLayout={onLayout}
             onPressIn={onPressHandler}
             onPressOut={onPressOutHandler}
-            style={[{ flex: 1, justifyContent: 'center', alignItems: 'center', overflow: 'hidden', width: '100%' }, style]}
+            style={[{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', overflow: 'hidden', width: '100%' }, style]}
             {...rest}
         >
             <Animated.View
