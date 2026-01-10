@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { SectionList } from 'react-native';
-
+import Animated, { FadeIn, FadeInDown, FadeInUp, FadeOut, FadeOutDown, LinearTransition } from 'react-native-reanimated';
 
 import colors from '@styles/colors';
 import AddButton from '@components/ui/AddButton';
@@ -26,14 +26,18 @@ type EntryListProps = { sections: SectionProp[], onPress: (id: number) => void, 
 
 function EntryList({ sections, onPress, onDelete }: EntryListProps) {
 
-    const renderItem = useCallback(({ item }:
-        { item: FoodEntry }) => (
-        <EntryCard data={item} onPress={() => {
-            // call onPress with item id
-            onPress(item.id);
-        }}
-            onDelete={() => onDelete(item.id)} />
-    ), [sections, onPress, onDelete]);
+    function renderItem({ item }: { item: FoodEntry }) {
+        return (
+            <Animated.View exiting={FadeOutDown} entering={FadeInUp}>
+                <EntryCard data={item} onPress={() => {
+                    // call onPress with item id
+                    onPress(item.id);
+                }}
+                    onDelete={() => onDelete(item.id)} />
+            </Animated.View>
+        );
+    }
+
 
 
     return (
@@ -45,6 +49,7 @@ function EntryList({ sections, onPress, onDelete }: EntryListProps) {
             keyExtractor={(item: any) => item.id}
             ListHeaderComponentStyle={{ backgroundColor: colors.background }}
             renderItem={renderItem}
+
             renderSectionHeader={({ section }:
                 { section: SectionProp }) => (
                 <Text style={styles.sectionHeader}>
@@ -112,10 +117,23 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
     const calories = entries.reduce((total, entry) => total + entry.calories * entry.quantity, 0);
     const groupedEntries = groupByMeal(entries).filter(section => section.data.length > 0);
 
-
+    function addDays(date: Date, days: number) {
+        const newDate = new Date(date);
+        newDate.setDate(newDate.getDate() + days);
+        return newDate;
+    }
+    console.log('currentDate:', currentDate);
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']} >
-            <Header />
+            <Header
+                onBackPress={() => {
+                    setCurrentDate(addDays(currentDate, -1));
+                }}
+                onForwardPress={() => {
+                    setCurrentDate(addDays(currentDate, 1));
+                }}
+                forwardDisabled={currentDate < new Date()}
+                date={currentDate} />
             <View style={{ marginBottom: '3%' }}>
                 <TotalCalories calories={Math.min(Math.round(calories), 99999)} />
             </View>
@@ -130,8 +148,8 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
                         setModalVisible(true);
                     }}
                     onDelete={(id: number) => {
-                        // deleteFoodEntry(id);
                         // open confirmation modal before deleting
+                        // todo make a gesture swipe to delete
                     }}
                 />
             </View>

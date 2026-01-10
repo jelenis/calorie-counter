@@ -1,13 +1,22 @@
 import { Text, View, StyleSheet, Pressable } from 'react-native';
 import colors from '@styles/colors';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Entypo from '@expo/vector-icons/Entypo';
 
-export default function Header() {
+type HeaderProps = {
+    date: Date;
+    onBackPress?: () => void;
+    onForwardPress?: () => void;
+    forwardDisabled?: boolean;
+};
+
+export default function Header({ onBackPress, onForwardPress, date, forwardDisabled }: HeaderProps) {
+    const dateString = `${date.toLocaleString('default', { month: 'short' })} ${date.getDate()}`;
     return (
         <View style={styles.container}>
             <Pressable style={styles.dateContainer}>
-                <Text style={styles.title}>Today</Text>
-                <MaterialIcons name="arrow-drop-down" size={24} color={colors.textSecondary} />
+                <Entypo onPress={onBackPress} name="chevron-small-left" size={24} color="black" />
+                <Text style={styles.title}>{dateString}</Text>
+                {!forwardDisabled ? null : <Entypo onPress={onForwardPress} name="chevron-small-right" size={24} color="black" />}
             </Pressable>
         </View>
     )
@@ -20,15 +29,18 @@ const styles = StyleSheet.create({
     },
     dateContainer: {
         padding: 5,
-        marginLeft: 20,
         width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-start',
+        gap: 10,
     },
     title: {
         color: colors.textSecondary,
         fontSize: 20,
         fontWeight: 'bold',
+    },
+    icon: {
+
     }
 })

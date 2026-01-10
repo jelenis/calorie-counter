@@ -174,10 +174,6 @@ function AutoCompleteSuggestion({ item, index, onPress }: { item: any; index: nu
     );
 }
 
-
-
-
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
