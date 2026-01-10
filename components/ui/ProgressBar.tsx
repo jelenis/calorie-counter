@@ -1,8 +1,8 @@
 import { View, StyleSheet } from 'react-native';
 import Animated, { withSpring, useAnimatedStyle } from 'react-native-reanimated';
 import { useSharedValue } from 'react-native-reanimated';
-import { useState, useEffect } from 'react';
-import colors from '../styles/colors';
+import { useEffect } from 'react';
+import colors from '@styles/colors';
 
 export default function ProgressBar({ progress = 0 }) {
     const width = useSharedValue(0);
@@ -12,12 +12,10 @@ export default function ProgressBar({ progress = 0 }) {
         width.value = withSpring(clamped);
     }, [progress]);
 
-    const animatedWidth = useAnimatedStyle(() => {
+    const animatedWidth = useAnimatedStyle(() => ({
+        width: `${width.value}%`
+    }));
 
-        return {
-            width: `${width.value}%`
-        };
-    });
     return (
         <View style={styles.container}>
             <Animated.View

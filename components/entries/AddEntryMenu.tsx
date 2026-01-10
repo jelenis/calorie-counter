@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-import RippleButton from './RippleButton';
-import type { FoodEntry } from '../utils/db';
-import Input from './Input';
+import RippleButton from '@components/feedback/RippleButton';
+import type { FoodEntry } from '@utils/db';
+import Input from '@components/ui/Input';
 import { Dropdown } from 'react-native-element-dropdown';
-import colors from '../styles/colors';
-import type { Food } from '../utils/db';
+import colors from '@styles/colors';
+import type { Food } from '@utils/db';
 
 type AddEntryMenuProps = {
     selectedItem: Partial<Food> | null;
@@ -14,9 +14,8 @@ type AddEntryMenuProps = {
     addFoodEntry: (item: Partial<FoodEntry>) => void;
     deleteFoodEntry?: (id: number) => void | undefined;
 }
+
 type Unit = 'serving' | 'g' | 'oz' | 'lb';
-
-
 
 export default function AddEntryMenu({ selectedItem, setModalVisible, addFoodEntry, deleteFoodEntry }: AddEntryMenuProps) {
     const [servingSize, setServingSize] = React.useState(1);
@@ -31,12 +30,10 @@ export default function AddEntryMenu({ selectedItem, setModalVisible, addFoodEnt
         'lb': 453.592,
     }
 
-
     useEffect(() => {
         if (selectedItem?.serving_text && selectedItem.serving_size_g) {
             setServingSize(selectedItem.serving_size_g);
         }
-
     }, [selectedItem?.serving_text, selectedItem?.serving_size_g])
 
     if (!selectedItem) {
@@ -49,17 +46,14 @@ export default function AddEntryMenu({ selectedItem, setModalVisible, addFoodEnt
     const totFat = selectedItem?.fat !== undefined ? selectedItem.fat * conversionMap[selectedUnit] * servingSize : 0;
     const brand = selectedItem?.brand || null;
 
-
     const defaultUnits = [
         { label: 'Grams (g)', value: 'g' },
         { label: 'Ounces (oz)', value: 'oz' },
         { label: 'Pounds (lb)', value: 'lb' },
     ]
-    console.log(selectedItem?.calories, totCals);
 
     return (
         <View>
-
             <View style={styles.menuContent}>
                 {brand && <Text style={styles.brand}>{brand}</Text>}
                 <Text style={[styles.selectedItemName, styles.borderBottom]}>{selectedItem?.name}</Text>
@@ -105,16 +99,13 @@ export default function AddEntryMenu({ selectedItem, setModalVisible, addFoodEnt
                     <View style={styles.servingSizePickerContainer}>
                         <Dropdown
                             data={defaultUnits}
-
                             maxHeight={300}
                             labelField="label"
                             valueField="value"
-
                             placeholder="Select item"
                             selectedTextStyle={{ color: colors.textSubtle }}
                             searchPlaceholder="Search..."
                             value={selectedUnit}
-
                             onChange={item => {
                                 setSelectedUnit(item.value);
                             }}
@@ -122,7 +113,6 @@ export default function AddEntryMenu({ selectedItem, setModalVisible, addFoodEnt
                                 <Text style={{ padding: 10 }}>{item.label}</Text>
                             }
                         />
-
                     </View>
                 </View>
             </View >
@@ -133,7 +123,6 @@ export default function AddEntryMenu({ selectedItem, setModalVisible, addFoodEnt
                     setModalVisible(false);
                 }} />}
                 <RippleButton style={styles.saveButton} text="Save" onPress={() => {
-
                     if (selectedItem) {
                         addFoodEntry({
                             ...selectedItem,
@@ -145,9 +134,9 @@ export default function AddEntryMenu({ selectedItem, setModalVisible, addFoodEnt
                 }} />
             </View>
         </View>
-
     );
 }
+
 const styles = StyleSheet.create({
     menuContent: {
         width: '100%',
@@ -198,12 +187,10 @@ const styles = StyleSheet.create({
         marginTop: 3,
         width: '100%',
         shadowOpacity: 0,
-
     },
     quantityInput: {
         paddingHorizontal: 1,
         width: 100,
-
     },
     menuFooter: {
         flexDirection: 'row',
@@ -214,7 +201,6 @@ const styles = StyleSheet.create({
         paddingTop: 20,
         gap: 20,
     },
-
     cancelButton: {
         backgroundColor: '#e66260ff',
         height: 40,
@@ -224,12 +210,10 @@ const styles = StyleSheet.create({
         width: 80,
         height: 40,
     },
-
     mealContainer: {
         minHeight: 120,
         paddingHorizontal: 20,
     },
-
     calories: {
         fontSize: 20,
         fontWeight: '600',
@@ -276,5 +260,4 @@ const styles = StyleSheet.create({
     oddRow: {
         backgroundColor: '#f9f9f9',
     }
-
 });

@@ -68,7 +68,6 @@ export default function TouchRipple({
     }
 
     return (
-
         <Pressable
             onLayout={onLayout}
             onPressIn={onPressHandler}
@@ -89,6 +88,5 @@ export default function TouchRipple({
             />
             {children}
         </Pressable>
-
     );
 }

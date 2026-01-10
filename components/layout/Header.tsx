@@ -1,5 +1,5 @@
 import { Text, View, StyleSheet, Pressable } from 'react-native';
-import colors from '../styles/colors';
+import colors from '@styles/colors';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function Header() {

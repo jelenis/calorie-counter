@@ -1,17 +1,12 @@
 import { StyleSheet, Text, Platform } from 'react-native';
-import colors from '../styles/colors';
-import { AnimatedNumber } from './AnimatedCounters';
-
-
-
+import colors from '@styles/colors';
+import { AnimatedNumber } from '@components/animations/AnimatedCounters';
 
 export default function TotalCalories({ calories = 0 }) {
-
     function formatNumber(num: number) {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
     return (
-
         <AnimatedNumber
             calories={calories}
             textStyle={styles.calorieText}
@@ -32,10 +27,7 @@ const styles = StyleSheet.create({
         fontSize: 30,
         marginLeft: 10,
         marginBottom: Platform.OS === 'ios' ? 5 : 0,
-
         fontWeight: Platform.OS === 'ios' ? '800' : '900',
         color: colors.textSubtle,
-
     }
-
 })

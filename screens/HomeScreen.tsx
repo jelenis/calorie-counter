@@ -6,16 +6,16 @@ import { useFocusEffect } from '@react-navigation/native';
 import { SectionList } from 'react-native';
 
 
-import colors from '../styles/colors';
-import AddButton from '../components/AddButton';
-import ProgressBar from '../components/ProgressBar';
-import TotalCalories from '../components/TotalCalories';
-import AddEntryMenu from '../components/AddEntryMenu';
-import EntryCard from '../components/EntryCard';
-import Header from '../components/Header';
-import * as db from '../utils/db';
+import colors from '@styles/colors';
+import AddButton from '@components/ui/AddButton';
+import ProgressBar from '@components/ui/ProgressBar';
+import TotalCalories from '@components/animations/TotalCalories';
+import AddEntryMenu from '@components/entries/AddEntryMenu';
+import EntryCard from '@components/entries/EntryCard';
+import Header from '@components/layout/Header';
+import * as db from '@utils/db';
 import type { FoodEntry } from '../utils/db';
-import Menu from '../components/Menu';
+import Menu from '@components/layout/Menu';
 
 
 type SectionProp = {
@@ -117,7 +117,7 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']} >
             <Header />
             <View style={{ marginBottom: '3%' }}>
-                <TotalCalories calories={Math.min(Math.round(calories), 99999)} />
+                <TotalCalories calories={Math.min(Math.round([1, 1000, 500, 1500][testCount % 4]), 99999)} />
             </View>
             {/*  main container */}
             <View style={styles.innerContainer}>
@@ -142,7 +142,7 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
             })} />
 
             {/* test button */}
-            <Button title="Test" onPress={() => setTestCount(Math.random() * 1000)} />
+            <Button title="Test" onPress={() => setTestCount(prev => prev + 1)} />
 
             {/* Add Entry Menu Modal */}
             <Menu modalVisible={modalVisible} setModalVisible={setModalVisible}>

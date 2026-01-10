@@ -3,15 +3,15 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, FlatList, Platform, Modal } from 'react-native';
-import AddEntryMenu from '../components/AddEntryMenu';
+import AddEntryMenu from '@components/entries/AddEntryMenu';
 
 
-import colors from '../styles/colors';
-import TouchRipple from '../components/TouchRipple';
+import colors from '@styles/colors';
+import TouchRipple from '@components/feedback/TouchRipple';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import SearchInput from '../components/SearchInput';
-import { insertEntry, type FoodEntry, type Food } from '../utils/db';
-import Menu from '../components/Menu';
+import SearchInput from '@components/search/SearchInput';
+import { insertEntry, type FoodEntry, type Food } from '@utils/db';
+import Menu from '@components/layout/Menu';
 import type { ModalStackParamList } from '../types/navigation';
 
 

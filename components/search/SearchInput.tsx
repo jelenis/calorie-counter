@@ -1,10 +1,9 @@
-
 import React, { useEffect } from 'react';
 import { View, TextInput, FlatList, ListRenderItemInfo, StyleSheet } from 'react-native';
 import Animated, { LinearTransition } from 'react-native-reanimated';
 import Entypo from '@expo/vector-icons/Entypo';
-import Input from './Input';
-import useDebounce from '../hooks/useDebounce';
+import Input from '@components/ui/Input';
+import useDebounce from '@hooks/useDebounce';
 
 export type SearchInputProps = {
     value: string;

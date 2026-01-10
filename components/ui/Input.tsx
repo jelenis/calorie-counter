@@ -1,11 +1,8 @@
 import { View, TextInput, StyleSheet } from 'react-native';
-import { cardShadow } from '../styles/card';
-
-
+import { cardShadow } from '@styles/card';
 
 export default function Input({ onChangeText = () => { }, style, containerStyle, ...rest }:
     { onChangeText?: (text: string) => void; containerStyle?: object } & TextInput['props']) {
-    // Placeholder for autocomplete input component
     return (
         <View style={[styles.outerInputContainer, containerStyle]}>
             <TextInput style={[styles.input, style]}

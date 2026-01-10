@@ -1,8 +1,4 @@
 import { View, Text, StyleSheet, Modal, Pressable } from 'react-native';
-import TouchRipple from './TouchRipple';
-import colors from '../styles/colors';
-import RippleButton from './RippleButton';
-import { use } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export type MenuProps = {
     modalVisible: boolean;
@@ -10,13 +6,11 @@ export type MenuProps = {
     children: React.ReactNode;
 };
 
-
 export default function Menu({ modalVisible, setModalVisible, children, ...rest }: MenuProps) {
     const insets = useSafeAreaInsets();
 
     return (
         <Modal
-
             visible={modalVisible}
             onRequestClose={() => setModalVisible(false)}
             transparent
@@ -52,5 +46,4 @@ const styles = StyleSheet.create({
         shadowRadius: 1,
         elevation: 5,
     },
-
 });

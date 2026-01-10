@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import colors from '../styles/colors';
-import { cardShadow } from '../styles/card';
-import { FoodEntry } from '../utils/db';
+import colors from '@styles/colors';
+import { cardShadow } from '@styles/card';
+import { FoodEntry } from '@utils/db';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 type EntryCardProps = {
@@ -21,16 +21,10 @@ export default function EntryCard({ data, onPress, onDelete }: EntryCardProps) {
             </View>
             <View style={styles.row}>
                 <Text style={styles.calories}>{Math.round(calories * quantity)} Cal</Text>
-                {/* <View style={styles.stats}>
-                    <Text style={styles.nutrient}>{Math.round(protein * quantity)} g</Text>
-                    <Text style={styles.nutrient}>{Math.round(fat * quantity)} g</Text>
-                    <Text style={styles.nutrient}>{Math.round(carbs * quantity)} g</Text>
-                </View> */}
             </View>
         </Pressable>
     )
 }
-
 
 const styles = StyleSheet.create({
     container: {

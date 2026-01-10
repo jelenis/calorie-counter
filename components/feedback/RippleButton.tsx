@@ -1,9 +1,9 @@
 import React from 'react';
 import { Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import TouchRipple from './TouchRipple';
+import TouchRipple from '@components/feedback/TouchRipple';
 import { View } from 'react-native';
-import colors from '../styles/colors';
+import colors from '@styles/colors';
 
 interface RippleButtonProps {
     text: string;
@@ -61,4 +61,3 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
 });
-
