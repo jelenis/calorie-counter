@@ -100,7 +100,7 @@ export default function AddScreen({ route, navigation }: Props) {
     const insets = useSafeAreaInsets();
     const [value, setValue] = React.useState('');
     const [modalVisible, setModalVisible] = React.useState(false);
-    const [selectedItem, setSelectedItem] = React.useState<Food | null>(null);
+    const [selectedItem, setSelectedItem] = React.useState<Partial<FoodEntry> | null>(null);
     function handleChangeText(text: string) {
         setValue(text);
         // Add any additional logic here
@@ -155,7 +155,6 @@ export default function AddScreen({ route, navigation }: Props) {
                     selectedItem={selectedItem}
                     setModalVisible={setModalVisible}
                     addFoodEntry={addFoodEntry}
-
                 />
             </Menu>
         </>
@@ -184,7 +183,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f5f5f5',
         width: '100%',
-        maxWidth: 600,
         alignItems: 'center',
         marginTop: Platform.OS === 'ios' ? 10 : 20,
     },
@@ -206,7 +204,6 @@ const styles = StyleSheet.create({
     name: {
         fontSize: 18,
         color: colors.textPrimary,
-
     },
     brand: {
         fontSize: 14,
@@ -231,7 +228,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     confirmButton: {
-        // backgroundColor: colors.success,
     },
     cancelButton: {
         backgroundColor: colors.error,

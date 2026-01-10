@@ -5,14 +5,14 @@ import Animated, {
     useSharedValue, useAnimatedStyle, withTiming, cancelAnimation, type WithTimingConfig
 } from "react-native-reanimated";
 
-import type { GestureResponderEvent, PressableProps, ViewStyle } from "react-native";
+import type { GestureResponderEvent, PressableProps, ViewStyle, StyleProp } from "react-native";
 
 interface TouchRippleProps {
     animationProps?: WithTimingConfig;
     children: React.ReactNode;
     onPressIn?: (e: GestureResponderEvent) => void;
     onPressOut?: (e: GestureResponderEvent) => void;
-    style?: ViewStyle | ViewStyle[];
+    style?: StyleProp<ViewStyle>;
     color?: string;
 }
 

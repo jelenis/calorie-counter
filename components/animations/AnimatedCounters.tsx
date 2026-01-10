@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import Animated, { useSharedValue, withTiming, useAnimatedStyle, withDelay, LinearTransition, FadeInDown, FadeInUp, FadeOutDown } from 'react-native-reanimated';
 import { useEffect, useLayoutEffect, useRef, useMemo, useState } from 'react';
 
-export function AnimatedNumber({ calories = 0, textStyle, unit, unitStyle, updateDelay = 300 }: {
+export function AnimatedNumber({ calories = 0, textStyle, unit, unitStyle, updateDelay = 100 }: {
     calories: number;
     textStyle?: TextStyle,
     unit?: string

@@ -11,7 +11,7 @@ const colors = {
     textSubtle: '#555555ff',
     ripple: '#cececeff',
     background: '#F3F5F5',
-    error: '#ff4d4d',
+    error: '#e66260',
     success: '#4BB543',
 };
 

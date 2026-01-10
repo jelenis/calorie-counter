@@ -1,2 +1,2 @@
-export { AnimatedNumber, AnimatedDoubleBuffer } from './AnimatedCounters';
+export { AnimatedNumber } from './AnimatedCounters';
 export { default as TotalCalories } from './TotalCalories';

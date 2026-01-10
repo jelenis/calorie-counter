@@ -14,13 +14,13 @@ export default function EntryCard({ data, onPress, onDelete }: EntryCardProps) {
     const { name, calories, protein, fat, carbs, brand, quantity } = data;
     return (
         <Pressable onPress={onPress} style={styles.container}>
+            <Text style={styles.calories}>{Math.round(calories * quantity)} Cal</Text>
             <Text style={styles.name}>{name.slice(0, 40)}</Text>
             <View style={styles.row}>
                 <Text style={styles.brand}>{brand}</Text>
-                <Text style={styles.brand}>{Math.round(quantity)} g</Text>
             </View>
             <View style={styles.row}>
-                <Text style={styles.calories}>{Math.round(calories * quantity)} Cal</Text>
+                <Text style={styles.brand}>{Math.round(quantity)} g</Text>
             </View>
         </Pressable>
     )
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 10
+        marginBottom: 5
     },
     stats: {
         marginLeft: 10,
@@ -59,8 +59,12 @@ const styles = StyleSheet.create({
         color: colors.textSubtle,
     },
     calories: {
+        position: 'absolute',
+        top: '40%',
+        right: 15,
+        fontSize: 18,
         fontWeight: '600',
-        color: colors.textSecondary,
+        color: colors.textPrimary,
     },
     nutrient: {
         fontWeight: '400',

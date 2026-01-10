@@ -22,12 +22,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#EEE',
+        borderColor: '#ddd',
         ...cardShadow
     },
     input: {
         width: '100%',
-        paddingVertical: 6,
+        paddingVertical: 10,
         paddingHorizontal: 15,
         fontSize: 16,
         borderWidth: 0,

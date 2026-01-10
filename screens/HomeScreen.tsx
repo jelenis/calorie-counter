@@ -117,7 +117,7 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']} >
             <Header />
             <View style={{ marginBottom: '3%' }}>
-                <TotalCalories calories={Math.min(Math.round([1, 1000, 500, 1500][testCount % 4]), 99999)} />
+                <TotalCalories calories={Math.min(Math.round(calories), 99999)} />
             </View>
             {/*  main container */}
             <View style={styles.innerContainer}>
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.background,
         paddingVertical: 5,
         paddingHorizontal: 10,
-        color: colors.textPrimary,
+        color: colors.textSecondary,
 
 
     }
