@@ -82,7 +82,7 @@ async function initialize(db: SQLite.SQLiteDatabase) {
     protein INTEGER NOT NULL,
     carbs INTEGER NOT NULL,
     fat INTEGER NOT NULL,
-    date_set TEXT NOT NULL UNIQUE
+    date TEXT NOT NULL UNIQUE
   );
 `);
 }

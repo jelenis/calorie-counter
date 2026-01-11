@@ -50,7 +50,6 @@ export default function Slider({
     const minorTicks = useMemo(() => getMinorTicks(tickLabels), [tickLabels]);
     const ticks = Array.from({ length: Math.round((max - min) / step) + 1 }, (_, i) => i);
 
-
     const pan = Gesture.Pan()
         .onBegin(() => {
             startX.value = knobX.value;
@@ -127,7 +126,7 @@ export default function Slider({
                     </Text>
                 </View>
             );
-        } else if (minorTicks.includes(currentValue)) {
+        } else if (minorTicks.includes(currentValue) || i == 0 || i == ticks.length - 1) {
             return (
                 <View key={i} style={{ alignItems: 'center', width: 0 }}>
                     {tick}

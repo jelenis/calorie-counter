@@ -70,9 +70,9 @@ export default function GoalScreen() {
                                 <Slider
                                     showTicks
                                     tickLabels={[1000, 2000, 3000, 4000]}
-                                    min={700}
+                                    min={1000}
                                     max={4000}
-                                    step={500}
+                                    step={100}
                                     value={calories}
                                     onUpdate={cals => setCalories(cals)}
                                     onChange={cals => setCalories(cals)}
