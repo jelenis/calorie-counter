@@ -28,7 +28,6 @@ export default function SearchInput({ data, keyExtractor = (item) => item.id, re
         if (debouncedValue === lastEmitted.current) return;
         lastEmitted.current = debouncedValue;
         onDebounceChange(debouncedValue);
-        console.log('Debounced value:', debouncedValue);
     }, [debouncedValue]);
 
     function AnimatedRow(itemData: ListRenderItemInfo<any>) {

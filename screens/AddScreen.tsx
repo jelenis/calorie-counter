@@ -1,8 +1,8 @@
 import type { ListRenderItemInfo } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import React, { use, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, FlatList, Platform, Modal } from 'react-native';
+import React, { useDeferredValue, useEffect, useMemo } from 'react';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import AddEntryMenu from '@components/entries/AddEntryMenu';
 import type { ModalStackParamList } from '../types/navigation';
 
@@ -40,42 +40,47 @@ function useRecents(query: string) {
 
 
 export default function AddScreen({ route, navigation }: Props) {
-
     const insets = useSafeAreaInsets();
     const [value, setValue] = React.useState('');
     const [debouncedValue, setDebouncedValue] = React.useState('');
     const [modalVisible, setModalVisible] = React.useState(false);
     const [selectedItem, setSelectedItem] = React.useState<EmptyFoodEntry | null>(null);
 
+    // Derived input values
     const trimmedValue = debouncedValue.trim().toLowerCase();
-
+    const deferredQuery = useDeferredValue(trimmedValue);
     const recents = useRecents(trimmedValue);
 
-    let results: EmptyFoodEntry[] = [];
-
-    const { isPending, isError, data, error } = useQuery({
+    // Search query
+    const { isError, data, error } = useQuery({
         queryKey: [trimmedValue],
-        queryFn: () => fetchSearchResults(trimmedValue),
-        enabled: trimmedValue.length > 3
+        queryFn: () => fetchSearchResults(deferredQuery),
+        enabled: deferredQuery.length > 3,
+        placeholderData: (prev) => prev,
     });
 
-    if (isError) {
-        console.error('Error fetching search results:', error);
-    }
-    if (data && data.length > 0) {
-        results = data;
-    } else if (trimmedValue.length <= 3) {
-        results = recents;
-    }
+    // Log errors once
+    useEffect(() => {
+        if (isError) {
+            console.error('Error fetching search results:', error);
+        }
+    }, [isError, error]);
 
-    function handleChangeText(text: string) {
-        setValue(text);
-    }
-    function handleBackPress() {
-        navigation.goBack();
-    }
+    // Prefer server results, fall back to recents for short queries
+    const results: EmptyFoodEntry[] = useMemo(() => {
+        if (data && data.length > 0) return data;
+        if (trimmedValue.length <= 3) return recents;
+        return [];
+    }, [data, recents, trimmedValue]);
 
-    async function addFoodEntry(item: EmptyFoodEntry) {
+
+    const handleChangeText = (text: string) => setValue(text);
+    const handleBackPress = () => navigation.goBack();
+    const onPressHandler = ({ item }: ListRenderItemInfo<Food>) => {
+        setSelectedItem(item);
+        setModalVisible(true);
+    };
+    const addFoodEntry = async (item: EmptyFoodEntry) => {
         if (route.params?.dateStr) {
             try {
                 await insertEntry(route.params.dateStr, item as FoodEntry);
@@ -83,13 +88,7 @@ export default function AddScreen({ route, navigation }: Props) {
                 console.error('Error inserting entry:', e);
             }
         }
-
-    }
-
-    function onPressHandler({ item }: ListRenderItemInfo<Food>) {
-        setSelectedItem(item);
-        setModalVisible(true);
-    }
+    };
 
     return (
         <>
