@@ -9,10 +9,11 @@ const colors = {
     textPrimary: lightBlue,
     textSecondary: darkGrey,
     textSubtle: '#555555ff',
+    sliderTrack: '#d0d0d0ff',
     ripple: '#cececeff',
     background: '#F3F5F5',
     error: '#e66260',
-    success: '#4BB543',
+    success: '#79d173ff',
 };
 
 export default colors;

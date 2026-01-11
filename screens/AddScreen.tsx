@@ -23,19 +23,21 @@ type Props = NativeStackScreenProps<ModalStackParamList, 'AddScreen'>;
 
 function useRecents(query: string) {
     const [recents, setRecents] = React.useState<EmptyFoodEntry[]>([]);
+    const [filteredRecents, setFilteredRecents] = React.useState<EmptyFoodEntry[]>([]);
     useEffect(() => {
-        if (query.length > 3) {
-            return;
-        }
         const regex = new RegExp(query, 'gi');
         db.getRecents().then((rows) => {
-            setRecents(rows.filter((row) => regex.test(row.name)));
-
+            setRecents(rows);
         }).catch((e) => {
             console.error('Error fetching recents:', e);
         });
-    }, [query]);
-    return recents;
+    }, []);
+    useEffect(() => {
+        const regex = new RegExp(query, 'gi');
+        setFilteredRecents(recents.filter((row) => regex.test(row.name)));
+    }, [query, recents]);
+
+    return filteredRecents;
 }
 
 
@@ -48,15 +50,21 @@ export default function AddScreen({ route, navigation }: Props) {
 
     // Derived input values
     const trimmedValue = debouncedValue.trim().toLowerCase();
-    const deferredQuery = useDeferredValue(trimmedValue);
     const recents = useRecents(trimmedValue);
-
+    console.log('Recents:', recents.length);
     // Search query
+
     const { isError, data, error } = useQuery({
         queryKey: [trimmedValue],
-        queryFn: () => fetchSearchResults(deferredQuery),
-        enabled: deferredQuery.length > 3,
-        placeholderData: (prev) => prev,
+        queryFn: () => fetchSearchResults(trimmedValue),
+        enabled: trimmedValue.length > 3 && recents.length < 15,
+        placeholderData: (prev) => {
+            if (trimmedValue.length === 0) {
+                console.log('Using placeholder data for empty query');
+                return undefined;
+            }
+            return prev;
+        },
     });
 
     // Log errors once

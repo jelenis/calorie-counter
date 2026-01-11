@@ -14,9 +14,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 // Screen
-import HomeScreen from './screens/HomeScreen'
-import AddScreen from './screens/AddScreen';
-import colors from './styles/colors';
+import HomeScreen from '@screens/HomeScreen'
+import AddScreen from '@screens/AddScreen';
+import GoalScreen from '@screens/GoalScreen';
+import colors from '@styles/colors';
 
 
 // Create a client
@@ -31,16 +32,40 @@ function TabBar() {
   function renderIcon({ focused, color, size }: { focused: boolean; color: string; size: number }) {
 
     let iconName: IconName = 'home';
+
+
     return <Ionicons name={iconName} size={size} color={color} />;
   }
 
   return (
     <Tab.Navigator screenOptions={{
+      tabBarActiveTintColor: colors.textPrimary,
       headerShown: false,
-      tabBarIcon: renderIcon,
       tabBarStyle: { alignContent: 'center', paddingTop: '2%', height: '9%' }
     }}>
-      <Tab.Screen name="Home" component={HomeStack} />
+      <Tab.Screen
+        name="Home"
+        component={HomeStack}
+        options={{
+
+          tabBarIcon: ({ focused, color, size }) => {
+            const iconName: IconName = 'home';
+            return <Ionicons name={iconName} size={size} color={color} />;
+          }
+        }}
+      />
+      <Tab.Screen
+        name="GoalScreen"
+        options={{
+
+          tabBarLabel: 'Goals',
+          tabBarIcon: ({ focused, color, size }) => {
+            const iconName: IconName = 'trophy';
+            return <Ionicons name={iconName} size={size} color={color} />;
+          }
+        }}
+        component={GoalScreen}
+      />
     </Tab.Navigator>
   );
 }
@@ -58,7 +83,6 @@ function HomeStack() {
         }}
         component={AddScreen}
       />
-
     </ModalStack.Navigator>
   )
 }

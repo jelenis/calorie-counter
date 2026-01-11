@@ -115,7 +115,7 @@ export default function AddEntryMenu({ selectedItem, setModalVisible, addFoodEnt
                             style={styles.quantityInput}
                             containerStyle={styles.quantityContainer}
                             defaultValue={servingSize.toString()} onChangeText={(text) => {
-                                const value = parseInt(text, 10);
+                                const value = parseFloat(text);
                                 if (!isNaN(value)) {
                                     setServingSize(value);
                                 }

@@ -1,7 +1,7 @@
 
 import { View, Text, StyleSheet, Button, TextInput, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { SectionList } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeInUp, FadeOut, FadeOutDown, LinearTransition } from 'react-native-reanimated';
@@ -66,14 +66,22 @@ function groupByMeal(rows: FoodEntry[]): { time: string; data: FoodEntry[] }[] {
         { time: 'Snacks', data: rows.filter(e => e.time === 'snack'), },
     ];
 }
-
+type Macro = { calories: number; protein: number; carbs: number; fat: number }
 export default function HomeScreen({ navigation, params }: { navigation: any; params?: { foodEntry?: FoodEntry } }) {
     const [entries, setEntries] = useState<any[]>([]);
     const [currentDate, setCurrentDate] = useState(() => new Date());
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState<FoodEntry | null>(null);
-    const [testCount, setTestCount] = useState(0);
+    const [macros, setMacros] = useState<Macro | null>(null);
 
+    const fetchMacrosForToday = useCallback(async () => {
+        try {
+            const macros = await db.getMacros();
+            setMacros(macros);
+        } catch (e) {
+            console.error('Error fetching macros:', e);
+        }
+    }, []);
 
     const fetchCaloriesForToday = useCallback(async () => {
         try {
@@ -87,9 +95,14 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
     useFocusEffect(
         useCallback(() => {
             fetchCaloriesForToday();
-
-        }, [fetchCaloriesForToday])
+            fetchMacrosForToday();
+        }, [fetchCaloriesForToday, fetchMacrosForToday])
     );
+
+    useEffect(() => {
+        fetchMacrosForToday();
+    }, [fetchMacrosForToday]);
+
 
     async function updateFoodEntry(item: Partial<FoodEntry>) {
         try {
@@ -109,7 +122,7 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
         }
     }
 
-    const dailyGoal = 2000;
+
     const calories = entries.reduce((total, entry) => total + entry.calories * entry.quantity, 0);
     const groupedEntries = groupByMeal(entries).filter(section => section.data.length > 0);
 
@@ -139,7 +152,7 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
                     </Animated.View>
                     {/*  main container */}
                     <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.innerContainer}>
-                        <ProgressBar progress={(calories / dailyGoal) * 100} />
+                        <ProgressBar progress={(calories / (macros ? macros.calories : 1)) * 100} />
                         <EntryList
                             sections={groupedEntries}
                             onPress={(id: number) => {
@@ -166,9 +179,6 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
             <AddButton onPress={() => navigation.navigate('AddScreen', {
                 dateStr: db.getDayKey(currentDate)
             })} />
-
-            {/* test button */}
-            <Button title="Test" onPress={() => setTestCount(prev => prev + 1)} />
 
             {/* Add Entry Menu Modal */}
             <Menu modalVisible={modalVisible} setModalVisible={setModalVisible}>

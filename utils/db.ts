@@ -75,6 +75,15 @@ async function initialize(db: SQLite.SQLiteDatabase) {
     FOREIGN KEY (day_id) REFERENCES days(id) ON DELETE CASCADE,
     FOREIGN KEY (food_id) REFERENCES foods(id) ON DELETE CASCADE
   );
+
+  CREATE TABLE IF NOT EXISTS goals (
+    id INTEGER PRIMARY KEY,
+    calories INTEGER NOT NULL,
+    protein INTEGER NOT NULL,
+    carbs INTEGER NOT NULL,
+    fat INTEGER NOT NULL,
+    date_set TEXT NOT NULL UNIQUE
+  );
 `);
 }
 // Insert or update a food entry for a specific date
@@ -194,3 +203,48 @@ export async function getEntriesByDate(date: string | Date): Promise<FoodEntry[]
     return entries;
 }
 
+export async function saveMacros(calories: number, protein: number, carbs: number, fat: number) {
+    const db = await getDB();
+    const today = getDayKey(new Date());
+    await db.runAsync(
+        `INSERT INTO goals (date, calories, protein, carbs, fat)
+         VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT(date) DO UPDATE SET
+           calories = excluded.calories,
+           protein  = excluded.protein,
+           carbs    = excluded.carbs,
+           fat      = excluded.fat;`,
+        [today, calories, protein, carbs, fat]
+    );
+}
+
+export async function getMacros(): Promise<{
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+} | null> {
+    const db = await getDB();
+    const today = getDayKey(new Date());
+    const row = await db.getFirstAsync<{
+        calories: number;
+        protein: number;
+        carbs: number;
+        fat: number;
+    }>(
+        `SELECT calories, protein, carbs, fat FROM goals WHERE date = ?;`,
+        today
+    );
+    if (!row) {
+        // insert default macros
+        const result = await db.runAsync(
+            `INSERT INTO goals (date, calories, protein, carbs, fat)
+             VALUES (?, 2000, 160, 280, 110);`,
+            today
+        );
+        // recursive for now, going to improve later
+        return await getMacros();
+    }
+
+    return row || null;
+}   

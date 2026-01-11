@@ -16,7 +16,7 @@ export type SearchInputProps = {
     placeholder?: string;
 } & TextInput['props'];
 
-const DEBOUNCE_TIME = 650;
+const DEBOUNCE_TIME = 450;
 
 export default function SearchInput({ data, keyExtractor = (item) => item.id, renderItem, onDebounceChange, onChangeText, value, onBackPress, placeholder = 'Search...', ...rest }: SearchInputProps) {
 

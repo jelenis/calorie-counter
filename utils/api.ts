@@ -4,7 +4,7 @@ const sampleFoodEntries: Food[] = [{ "brand": "Taifun", "calories": 1.9024856, "
 export async function fetchSearchResults(query: string) {
     console.log('Fetching results for query:', query);
     if (__DEV__) {
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 500));
         return normalizedEntries(sampleFoodEntries);
     }
     const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}?q=${encodeURIComponent(query)}`);
