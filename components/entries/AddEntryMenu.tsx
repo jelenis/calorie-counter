@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { use, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 import { RippleButton, ToggleButton } from '@components/ui';
-import type { FoodEntry } from '@utils/db';
+import type { EmptyFoodEntry, FoodEntry } from '@utils/db';
 import Input from '@components/ui/Input';
 import { Dropdown } from 'react-native-element-dropdown';
 import colors from '@styles/colors';
@@ -10,9 +10,9 @@ import { ToggleListButton } from '@components/ui/ToggleButton';
 
 
 type AddEntryMenuProps = {
-    selectedItem: Partial<FoodEntry> | null;
+    selectedItem: EmptyFoodEntry | null;
     setModalVisible: (visible: boolean) => void;
-    addFoodEntry: (item: Partial<FoodEntry>) => void;
+    addFoodEntry: (item: EmptyFoodEntry) => void;
     deleteFoodEntry?: (id: number) => void | undefined;
 }
 
@@ -62,7 +62,6 @@ export default function AddEntryMenu({ selectedItem, setModalVisible, addFoodEnt
         { label: 'Ounces (oz)', value: 'oz' },
         { label: 'Pounds (lb)', value: 'lb' },
     ]
-
 
 
     return (

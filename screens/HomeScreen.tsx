@@ -37,9 +37,6 @@ function EntryList({ sections, onPress, onDelete }: EntryListProps) {
             </Animated.View>
         );
     }
-
-
-
     return (
         <SectionList
             showsVerticalScrollIndicator={false}
@@ -76,8 +73,9 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState<FoodEntry | null>(null);
     const [testCount, setTestCount] = useState(0);
+
+
     const fetchCaloriesForToday = useCallback(async () => {
-        console.log('Fetching entries for date:', currentDate);
         try {
             const entries = await db.getEntriesByDate(currentDate);
             setEntries(entries);
@@ -94,7 +92,6 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
     );
 
     async function updateFoodEntry(item: Partial<FoodEntry>) {
-        console.log('Adding/Updating entry:', item);
         try {
             await db.insertEntry(currentDate, item as FoodEntry);
             fetchCaloriesForToday();
@@ -104,7 +101,6 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
         }
     }
     async function deleteFoodEntry(entryId: number) {
-        console.log('Deleting entry with ID:', entryId);
         try {
             await db.deleteEntry(entryId);
             fetchCaloriesForToday();
@@ -123,7 +119,6 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
         return newDate;
     }
     const hasEntries = entries.length > 0;
-    console.log('currentDate:', hasEntries, currentDate.toDateString(), entries.length);
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']} >
             <Header
@@ -133,7 +128,8 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
                 onForwardPress={() => {
                     setCurrentDate(addDays(currentDate, 1));
                 }}
-                forwardDisabled={currentDate < new Date()}
+                // Disable forward button if currentDate is today or later
+                forwardDisabled={currentDate < new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())}
                 date={currentDate} />
             {/* total calories */}
             {hasEntries ? (

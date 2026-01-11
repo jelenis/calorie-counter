@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { Query, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // react navigation
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -16,9 +17,10 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import HomeScreen from './screens/HomeScreen'
 import AddScreen from './screens/AddScreen';
 import colors from './styles/colors';
-import EditScreen from './screens/EditScreen';
 
 
+// Create a client
+const queryClient = new QueryClient()
 
 const ModalStack = createNativeStackNavigator<ModalStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -33,7 +35,6 @@ function TabBar() {
   }
 
   return (
-
     <Tab.Navigator screenOptions={{
       headerShown: false,
       tabBarIcon: renderIcon,
@@ -57,29 +58,23 @@ function HomeStack() {
         }}
         component={AddScreen}
       />
-      <ModalStack.Screen
-        name="EditScreen"
-        options={{
-          presentation: 'containedModal',
-          animation: 'fade',
-          animationDuration: 600,
-        }}
-        component={EditScreen}
-      />
+
     </ModalStack.Navigator>
   )
 }
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <StatusBar style="auto" />
-      <View style={styles.container}>
-        <NavigationContainer>
-          <TabBar />
-        </NavigationContainer>
-      </View>
-    </SafeAreaProvider>
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <StatusBar style="auto" />
+        <View style={styles.container}>
+          <NavigationContainer>
+            <TabBar />
+          </NavigationContainer>
+        </View>
+      </SafeAreaProvider>
+    </QueryClientProvider>
   );
 }
 

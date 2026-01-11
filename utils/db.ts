@@ -4,13 +4,13 @@ let db: SQLite.SQLiteDatabase | null = null;
 
 export type Food = {
     id: number;
-    upc?: string;
+    upc?: string | null;
     name: string;
-    brand?: string;
-    category?: string;
+    brand?: string | null;
+    category?: string | null;
 
-    serving_size_g?: number;
-    serving_text?: string;
+    serving_size_g?: number | null;
+    serving_text?: string | null;
     calories: number;
     protein: number;
     fat: number;
@@ -24,6 +24,8 @@ export type FoodEntry = Food & {
     time: 'breakfast' | 'lunch' | 'dinner' | 'snack';
     quantity: number;
 }
+
+export type EmptyFoodEntry = Food & Partial<FoodEntry>;
 
 export async function getDB() {
     if (db) return db;
@@ -74,8 +76,6 @@ async function initialize(db: SQLite.SQLiteDatabase) {
     FOREIGN KEY (food_id) REFERENCES foods(id) ON DELETE CASCADE
   );
 `);
-
-
 }
 // Insert or update a food entry for a specific date
 // if id exists, update the entry
@@ -101,7 +101,6 @@ export async function insertEntry(
     if (!dayId) {
         throw new Error('Failed to retrieve day ID after insertion.');
     }
-
     await db.runAsync(
         `INSERT OR IGNORE INTO foods (
             id, 
@@ -144,8 +143,18 @@ export async function insertEntry(
             entry.time
         ]
     );
-    console.log('Inserted/Updated entry with ID:', result.lastInsertRowId);
     return result.lastInsertRowId;
+}
+
+export async function getRecents(): Promise<FoodEntry[]> {
+    const db = await getDB();
+    const foods = await db.getAllAsync<FoodEntry>(
+        `SELECT DISTINCT f.*, e.food_id FROM foods f
+         JOIN entries e ON e.food_id = f.id
+         ORDER BY e.id DESC
+         LIMIT 35;`
+    );
+    return foods;
 }
 
 export async function deleteEntry(entryId: number) {

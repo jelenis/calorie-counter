@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, TextInput, FlatList, ListRenderItemInfo, StyleSheet } from 'react-native';
-import Animated, { LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeInUp, FadeOutDown, LinearTransition } from 'react-native-reanimated';
 import Entypo from '@expo/vector-icons/Entypo';
 import Input from '@components/ui/Input';
 import useDebounce from '@hooks/useDebounce';
@@ -8,6 +8,7 @@ import useDebounce from '@hooks/useDebounce';
 export type SearchInputProps = {
     value: string;
     onChangeText: (text: string) => void;
+    onDebounceChange: (text: string) => void;
     onBackPress: () => void;
     renderItem: (info: ListRenderItemInfo<any>) => React.ReactElement | null;
     data: any[];
@@ -15,16 +16,24 @@ export type SearchInputProps = {
     placeholder?: string;
 } & TextInput['props'];
 
-const DEBOUNCE_TIME = 200;
+const DEBOUNCE_TIME = 650;
 
-export default function SearchInput({ data, keyExtractor = (item) => item.id, renderItem, onChangeText, value, onBackPress, placeholder = 'Search...', ...rest }: SearchInputProps) {
+export default function SearchInput({ data, keyExtractor = (item) => item.id, renderItem, onDebounceChange, onChangeText, value, onBackPress, placeholder = 'Search...', ...rest }: SearchInputProps) {
 
     const debouncedValue = useDebounce(value, DEBOUNCE_TIME);
-    useEffect(() => onChangeText(debouncedValue), [debouncedValue]);
+    const lastEmitted = React.useRef<string>(value);
+    useEffect(() => {
+        // dont call onChangeText if value is the same
+        // this is the enter key can be handled without triggering onChangeText again
+        if (debouncedValue === lastEmitted.current) return;
+        lastEmitted.current = debouncedValue;
+        onDebounceChange(debouncedValue);
+        console.log('Debounced value:', debouncedValue);
+    }, [debouncedValue]);
 
     function AnimatedRow(itemData: ListRenderItemInfo<any>) {
         return (
-            <Animated.View layout={LinearTransition}>
+            <Animated.View exiting={FadeOutDown} entering={FadeInUp} layout={LinearTransition}>
                 {renderItem({ ...itemData })}
             </Animated.View>
         );
@@ -33,9 +42,11 @@ export default function SearchInput({ data, keyExtractor = (item) => item.id, re
     function onChangeTextInternal(text: string) {
         onChangeText(text);
     }
-    const filteredData = data.filter(entry =>
-        debouncedValue && entry.name.toLowerCase().includes(debouncedValue.toLowerCase())
-    );
+    function handleSubmit() {
+        lastEmitted.current = value;
+        onDebounceChange(value);
+    }
+
 
     return (
         <>
@@ -45,13 +56,14 @@ export default function SearchInput({ data, keyExtractor = (item) => item.id, re
                     placeholder={placeholder}
                     onChangeText={onChangeTextInternal}
                     value={value}
+                    onSubmitEditing={handleSubmit}
                     {...rest} />
             </View>
             <FlatList
                 showsVerticalScrollIndicator={true}
                 alwaysBounceVertical={false}
                 style={styles.resultsList}
-                data={filteredData}
+                data={data}
                 renderItem={AnimatedRow}
                 keyExtractor={keyExtractor}
             />
