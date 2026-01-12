@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import Animated, { useSharedValue, withTiming, useAnimatedStyle, withDelay, LinearTransition, FadeInDown, FadeInUp, FadeOutDown } from 'react-native-reanimated';
+import Animated, { useSharedValue, withTiming, useAnimatedStyle, withDelay, LinearTransition, FadeInDown, FadeInUp, FadeOutDown, Easing } from 'react-native-reanimated';
 import { useEffect, useLayoutEffect, useRef, useMemo, useState } from 'react';
 
 export function AnimatedNumber({ calories = 0, textStyle, unit, unitStyle, updateDelay = 100 }: {
@@ -25,7 +25,11 @@ export function AnimatedNumber({ calories = 0, textStyle, unit, unitStyle, updat
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
             <Animated.Text layout={FadeInDown.duration(updateDelay * 2)} style={[{ flexDirection: 'row' }, textStyle]} >{elements}</Animated.Text>
             {unit !== undefined &&
-                <Animated.Text layout={LinearTransition.duration(updateDelay * 2)} style={[unitStyle,]}>{unit}</Animated.Text>
+                <Animated.Text layout={LinearTransition.springify()
+                    .damping(100)
+                    .mass(0.4)
+
+                } style={[unitStyle,]}>{unit}</Animated.Text>
             }
         </View >
     );

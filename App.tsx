@@ -26,21 +26,12 @@ const queryClient = new QueryClient()
 const ModalStack = createNativeStackNavigator<ModalStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
-
-type IconName = keyof typeof Ionicons.glyphMap;
 function TabBar() {
-  function renderIcon({ focused, color, size }: { focused: boolean; color: string; size: number }) {
-
-    let iconName: IconName = 'home';
-
-
-    return <Ionicons name={iconName} size={size} color={color} />;
-  }
-
   return (
     <Tab.Navigator screenOptions={{
       tabBarActiveTintColor: colors.textPrimary,
       headerShown: false,
+      animation: 'fade',
       tabBarStyle: { alignContent: 'center', paddingTop: '2%', height: '9%' }
     }}>
       <Tab.Screen
@@ -60,8 +51,8 @@ function TabBar() {
 
           tabBarLabel: 'Goals',
           tabBarIcon: ({ focused, color, size }) => {
-            const iconName: IconName = 'trophy';
-            return <Ionicons name={iconName} size={size} color={color} />;
+
+            return <Ionicons name={'trophy'} size={size} color={color} />;
           }
         }}
         component={GoalScreen}
@@ -79,7 +70,7 @@ function HomeStack() {
         options={{
           presentation: 'containedModal',
           animation: 'fade_from_bottom',
-          animationDuration: 600,
+          animationDuration: 300,
         }}
         component={AddScreen}
       />

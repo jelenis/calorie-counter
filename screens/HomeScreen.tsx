@@ -181,12 +181,13 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
             })} />
 
             {/* Add Entry Menu Modal */}
-            <Menu modalVisible={modalVisible} setModalVisible={setModalVisible}>
+            <Menu visible={modalVisible} setVisible={setModalVisible}>
+
                 <AddEntryMenu
                     selectedItem={selectedItem}
-                    setModalVisible={setModalVisible}
-                    addFoodEntry={(item) => updateFoodEntry(item)}
-                    deleteFoodEntry={(id) => { deleteFoodEntry(id); }}
+                    closeModal={() => setModalVisible(false)}
+                    addFoodEntry={async (item) => await updateFoodEntry(item)}
+                    deleteFoodEntry={async (id) => { await deleteFoodEntry(id); }}
                 />
             </Menu>
         </SafeAreaView>

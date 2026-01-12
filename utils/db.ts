@@ -237,11 +237,7 @@ export async function getMacros(): Promise<{
     );
     if (!row) {
         // insert default macros
-        const result = await db.runAsync(
-            `INSERT INTO goals (date, calories, protein, carbs, fat)
-             VALUES (?, 2000, 160, 280, 110);`,
-            today
-        );
+        await saveMacros(2000, 150, 250, 70);
         // recursive for now, going to improve later
         return await getMacros();
     }

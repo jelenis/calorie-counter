@@ -7,19 +7,19 @@ import Input from '@components/ui/Input';
 import { Dropdown } from 'react-native-element-dropdown';
 import colors from '@styles/colors';
 import { ToggleListButton } from '@components/ui/ToggleButton';
-
+import { useNavigation } from '@react-navigation/native';
 
 type AddEntryMenuProps = {
     selectedItem: EmptyFoodEntry | null;
-    setModalVisible: (visible: boolean) => void;
-    addFoodEntry: (item: EmptyFoodEntry) => void;
-    deleteFoodEntry?: (id: number) => void | undefined;
+    addFoodEntry: (item: EmptyFoodEntry) => Promise<void>;
+    deleteFoodEntry?: (id: number) => Promise<void> | undefined;
+    closeModal: () => void;
 }
 
 type Unit = 'serving' | 'g' | 'oz' | 'lb';
 type MealTime = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
-export default function AddEntryMenu({ selectedItem, setModalVisible, addFoodEntry, deleteFoodEntry }: AddEntryMenuProps) {
+export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEntry, closeModal }: AddEntryMenuProps) {
     const [servingSize, setServingSize] = React.useState(1);
     const [selectedUnit, setSelectedUnit] = React.useState<Unit>('g');
     const [time, setTime] = React.useState<MealTime>('breakfast');
@@ -34,7 +34,7 @@ export default function AddEntryMenu({ selectedItem, setModalVisible, addFoodEnt
     }
     const isEditing = Boolean(deleteFoodEntry);
 
-
+    const navigation = useNavigation();
     // set a default serving size when selectedItem changes, only on new enty
     useEffect(() => {
         if (selectedItem?.serving_text && selectedItem.serving_size_g) {
@@ -145,17 +145,20 @@ export default function AddEntryMenu({ selectedItem, setModalVisible, addFoodEnt
             <View style={[styles.menuFooter, styles.borderTop, { justifyContent: deleteFoodEntry ? 'space-between' : 'flex-end' }]}>
                 {deleteFoodEntry && <RippleButton style={styles.cancelButton} text="Delete" onPress={() => {
                     deleteFoodEntry(selectedItem?.id || 0);
-                    setModalVisible(false);
+                    closeModal();
                 }} />}
-                <RippleButton style={styles.saveButton} text="Save" onPress={() => {
+                <RippleButton style={styles.saveButton} text="Save" onPress={async () => {
                     if (selectedItem) {
-                        addFoodEntry({
+                        await addFoodEntry({
                             ...selectedItem,
                             quantity: servingSize * conversionMap[selectedUnit],
                             time
                         });
                     }
-                    setModalVisible(false);
+                    closeModal();
+                    if (navigation && !isEditing) {
+                        navigation.goBack();
+                    }
                 }} />
             </View>
         </View >
