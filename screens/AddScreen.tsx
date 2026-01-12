@@ -118,7 +118,7 @@ export default function AddScreen({ route, navigation }: Props) {
                     keyExtractor={(item) => `${item.food_id}-${item.id ?? ''}`}
                 />
             </View>
-            <Menu visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
+            <Menu visible={modalVisible} setVisible={setModalVisible}>
                 <AddEntryMenu
                     selectedItem={selectedItem}
                     addFoodEntry={addFoodEntry}

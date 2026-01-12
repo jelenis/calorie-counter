@@ -38,10 +38,9 @@ function TabBar() {
         name="Home"
         component={HomeStack}
         options={{
-
+          popToTopOnBlur: true,
           tabBarIcon: ({ focused, color, size }) => {
-            const iconName: IconName = 'home';
-            return <Ionicons name={iconName} size={size} color={color} />;
+            return <Ionicons name={'home'} size={size} color={color} />;
           }
         }}
       />

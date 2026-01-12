@@ -44,7 +44,10 @@ export default function Menu({ visible, setVisible, children, }: MenuProps) {
         >
             <Animated.View style={[{ flex: 1 }, animatedStyle]}  >
                 <Pressable style={[styles.modalBackground, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-                    onPress={() => setVisible(false)}>
+                    onPress={() => {
+                        console.log('Background pressed, closing menu');
+                        setVisible(false)
+                    }}>
                     <Pressable onPress={() => { }} style={styles.modalView}>
                         {children}
                     </Pressable>
