@@ -16,13 +16,13 @@ export default function Input({ onChangeText = () => { }, style, containerStyle,
 
 const styles = StyleSheet.create({
     outerInputContainer: {
-        width: '100%',
         backgroundColor: 'white',
         borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#ddd',
+        flexGrow: 1,
         ...cardShadow
     },
     input: {

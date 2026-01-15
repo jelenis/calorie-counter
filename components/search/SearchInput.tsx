@@ -73,10 +73,11 @@ export default function SearchInput({ data, keyExtractor = (item) => item.id, re
 const styles = StyleSheet.create({
     searchBar: {
         flexDirection: 'row',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         alignItems: 'center',
         gap: 10,
-        paddingHorizontal: '10%',
+        paddingHorizontal: 10,
+
     },
     resultsList: {
         marginTop: 10,

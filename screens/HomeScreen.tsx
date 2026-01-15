@@ -43,7 +43,7 @@ function EntryList({ sections, onPress, onDelete }: EntryListProps) {
             style={{ flex: 1, marginTop: 20, width: '100%' }}
             sections={sections}
 
-            keyExtractor={(item: any) => item.id}
+            keyExtractor={(item: any) => String(item.id)}
             ListHeaderComponentStyle={{ backgroundColor: colors.background }}
             renderItem={renderItem}
 

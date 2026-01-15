@@ -46,100 +46,91 @@ export default function GoalScreen() {
             <GestureHandlerRootView style={{ flex: 1, height: '100%' }} onLayout={(e) => {
                 setContainerHeight(e.nativeEvent.layout.height);
             }}>
-                <View>
-                    <Text style={styles.sectionTitle}>Control Your Daily Macros</Text>
+
+                <View style={styles.section}>
+                    <View style={styles.card}>
+                        <View style={styles.cardHeaderRow}>
+                            <Text style={styles.labelText}>Calories</Text>
+                            <Text style={styles.valueText}>{calories} Cal</Text>
+                        </View>
+                        <View style={styles.cardContent}>
+                            <Slider
+                                showTicks
+                                tickLabels={[1000, 2000, 3000, 4000]}
+                                min={1000}
+                                max={4000}
+                                step={100}
+                                value={calories}
+                                onUpdate={cals => setCalories(cals)}
+                                onChange={cals => setCalories(cals)}
+                            />
+                        </View>
+                    </View>
+                    <View style={styles.card}>
+                        <View style={styles.cardHeaderRow}>
+                            <Text style={styles.labelText}>Protein</Text>
+                            <Text style={styles.valueText}>{protein} g</Text>
+                        </View>
+                        <View style={styles.cardContent}>
+                            <Slider
+                                showTicks
+                                tickLabels={[40, 100, 160, 220, 280]}
+                                min={40}
+                                max={280}
+                                step={5}
+                                value={protein}
+                                onUpdate={v => setProtein(v)}
+                                onChange={v => setProtein(v)}
+                            />
+                        </View>
+                    </View>
+                    <View style={styles.card}>
+                        <View style={styles.cardHeaderRow}>
+                            <Text style={styles.labelText}>Carbohydrates</Text>
+                            <Text style={styles.valueText}>{carbs} g</Text>
+                        </View>
+                        <View style={styles.cardContent}>
+                            <Slider
+                                showTicks
+                                tickLabels={[20, 150, 280, 410, 540]}
+                                min={20}
+                                max={540}
+                                step={10}
+                                value={carbs}
+                                onUpdate={v => setCarbs(v)}
+                                onChange={v => setCarbs(v)}
+                            />
+                        </View>
+                    </View>
+                    <View style={styles.card}>
+                        <View style={styles.cardHeaderRow}>
+                            <Text style={styles.labelText}>Fats</Text>
+                            <Text style={styles.valueText}>{fat} g</Text>
+                        </View>
+                        <View style={styles.cardContent}>
+                            <Slider
+                                showTicks
+                                tickLabels={[30, 70, 110, 150, 190]}
+                                min={30}
+                                max={190}
+                                step={5}
+                                value={fat}
+                                onUpdate={v => setFat(v)}
+                                onChange={v => setFat(v)}
+                            />
+                        </View>
+                    </View>
+                </View>
+                <View style={{ marginVertical: 10, flexDirection: 'row', justifyContent: 'flex-end' }}>
+                    <RippleButton
+                        onPress={async () => {
+                            await saveMacros(calories, protein, carbs, fat);
+                            loadMacrosForToday();
+                        }}
+                        style={styles.saveButton}
+                        text='Save'></RippleButton>
                 </View>
 
-                <ScrollView
-                    showsVerticalScrollIndicator={scrollEnabled}
-                    alwaysBounceVertical={false}
-                    scrollEnabled={scrollEnabled}
-                    onContentSizeChange={(_, h) => setContentHeight(h)}
-                >
-                    <View style={styles.section}>
-                        <View style={styles.card}>
-                            <View style={styles.cardHeaderRow}>
-                                <Text style={styles.labelText}>Calories</Text>
-                                <Text style={styles.valueText}>{calories} Cal</Text>
-                            </View>
-                            <View style={styles.cardContent}>
-                                <Slider
-                                    showTicks
-                                    tickLabels={[1000, 2000, 3000, 4000]}
-                                    min={1000}
-                                    max={4000}
-                                    step={100}
-                                    value={calories}
-                                    onUpdate={cals => setCalories(cals)}
-                                    onChange={cals => setCalories(cals)}
-                                />
-                            </View>
-                        </View>
-                        <View style={styles.card}>
-                            <View style={styles.cardHeaderRow}>
-                                <Text style={styles.labelText}>Protein</Text>
-                                <Text style={styles.valueText}>{protein} g</Text>
-                            </View>
-                            <View style={styles.cardContent}>
-                                <Slider
-                                    showTicks
-                                    tickLabels={[40, 100, 160, 220, 280]}
-                                    min={40}
-                                    max={280}
-                                    step={5}
-                                    value={protein}
-                                    onUpdate={v => setProtein(v)}
-                                    onChange={v => setProtein(v)}
-                                />
-                            </View>
-                        </View>
-                        <View style={styles.card}>
-                            <View style={styles.cardHeaderRow}>
-                                <Text style={styles.labelText}>Carbohydrates</Text>
-                                <Text style={styles.valueText}>{carbs} g</Text>
-                            </View>
-                            <View style={styles.cardContent}>
-                                <Slider
-                                    showTicks
-                                    tickLabels={[20, 150, 280, 410, 540]}
-                                    min={20}
-                                    max={540}
-                                    step={10}
-                                    value={carbs}
-                                    onUpdate={v => setCarbs(v)}
-                                    onChange={v => setCarbs(v)}
-                                />
-                            </View>
-                        </View>
-                        <View style={styles.card}>
-                            <View style={styles.cardHeaderRow}>
-                                <Text style={styles.labelText}>Fats</Text>
-                                <Text style={styles.valueText}>{fat} g</Text>
-                            </View>
-                            <View style={styles.cardContent}>
-                                <Slider
-                                    showTicks
-                                    tickLabels={[30, 70, 110, 150, 190]}
-                                    min={30}
-                                    max={190}
-                                    step={5}
-                                    value={fat}
-                                    onUpdate={v => setFat(v)}
-                                    onChange={v => setFat(v)}
-                                />
-                            </View>
-                        </View>
-                    </View>
-                    <View style={{ marginVertical: 12, flexDirection: 'row', justifyContent: 'flex-end' }}>
-                        <RippleButton
-                            onPress={async () => {
-                                await saveMacros(calories, protein, carbs, fat);
-                                loadMacrosForToday();
-                            }}
-                            style={styles.saveButton}
-                            text='Save'></RippleButton>
-                    </View>
-                </ScrollView>
 
             </GestureHandlerRootView>
         </SafeAreaView >
@@ -170,7 +161,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     section: {
-        flex: 1,
         gap: 12,
     },
     sectionTitle: {

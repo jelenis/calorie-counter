@@ -24,6 +24,7 @@ export type FoodEntry = Food & {
     time: 'breakfast' | 'lunch' | 'dinner' | 'snack';
     quantity: number;
 }
+export type userFood = Omit<Food, 'id'>;
 
 export type EmptyFoodEntry = Food & Partial<FoodEntry>;
 
@@ -37,63 +38,85 @@ export async function getDB() {
 }
 
 async function initialize(db: SQLite.SQLiteDatabase) {
-    await db.execAsync(`
-  PRAGMA journal_mode = WAL;
-  PRAGMA foreign_keys = ON;
 
- /* DROP TABLE IF EXISTS entries;
-  DROP TABLE IF EXISTS foods;
-  DROP TABLE IF EXISTS days; */
 
-  CREATE TABLE IF NOT EXISTS days (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    date TEXT NOT NULL UNIQUE  -- YYYY-MM-DD
-  );
+    const sql = `
+        PRAGMA journal_mode = WAL;
+        PRAGMA foreign_keys = ON;
+        
+        DROP TABLE IF EXISTS entries;
+        DROP TABLE IF EXISTS foods;
+        DROP TABLE IF EXISTS days;
+        DROP TABLE IF EXISTS user_foods;
+        
+        CREATE TABLE IF NOT EXISTS days (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT NOT NULL UNIQUE  -- YYYY-MM-DD
+        );
+        
+        CREATE TABLE IF NOT EXISTS user_foods (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            calories INTEGER NOT NULL,
+            category TEXT,
+            brand TEXT,
+            serving_size_g REAL,
+            serving_text TEXT,
+            protein REAL,
+            fat REAL,
+            carbs REAL
+        );
+        
+        CREATE TABLE IF NOT EXISTS foods (
+            id INTEGER PRIMARY KEY,
+            upc TEXT,
+            name TEXT NOT NULL,
+            calories INTEGER NOT NULL,
+            category TEXT,
+            brand TEXT,
+            serving_size_g REAL,
+            serving_text TEXT,
+            protein REAL,
+            fat REAL,
+            carbs REAL
+        );
+        
+        CREATE TABLE IF NOT EXISTS entries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            quantity INTEGER DEFAULT 1,
+            day_id INTEGER NOT NULL,
+        
+            food_id INTEGER DEFAULT NULL,
+            user_food_id INTEGER DEFAULT NULL,
+        
+            time TEXT NOT NULL DEFAULT 'snack',
+            CHECK (time IN ('breakfast','lunch','dinner','snack')),
+            FOREIGN KEY (day_id) REFERENCES days(id) ON DELETE CASCADE,
+            FOREIGN KEY (food_id) REFERENCES foods(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_food_id) REFERENCES user_foods(id) ON DELETE CASCADE,
+            CHECK (food_id IS NOT NULL OR user_food_id IS NOT NULL)
+        );
+        
+        CREATE TABLE IF NOT EXISTS goals (
+            id INTEGER PRIMARY KEY,
+            calories INTEGER NOT NULL,
+            protein INTEGER NOT NULL,
+            carbs INTEGER NOT NULL,
+            fat INTEGER NOT NULL,
+            date TEXT NOT NULL UNIQUE
+        );`;
 
-  CREATE TABLE IF NOT EXISTS foods (
-    id INTEGER PRIMARY KEY,
-    upc TEXT,
-    name TEXT NOT NULL,
-    calories INTEGER NOT NULL,
-    category TEXT,
-    brand TEXT,
-    serving_size_g REAL,
-    serving_text TEXT,
-    protein REAL,
-    fat REAL,
-    carbs REAL
-  );
 
-  CREATE TABLE IF NOT EXISTS entries (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    quantity INTEGER DEFAULT 1,
-    day_id INTEGER NOT NULL,
-    food_id INTEGER NOT NULL,
-    time TEXT NOT NULL DEFAULT 'snack',
-    CHECK (time IN ('breakfast','lunch','dinner','snack')),
-
-    FOREIGN KEY (day_id) REFERENCES days(id) ON DELETE CASCADE,
-    FOREIGN KEY (food_id) REFERENCES foods(id) ON DELETE CASCADE
-  );
-
-  CREATE TABLE IF NOT EXISTS goals (
-    id INTEGER PRIMARY KEY,
-    calories INTEGER NOT NULL,
-    protein INTEGER NOT NULL,
-    carbs INTEGER NOT NULL,
-    fat INTEGER NOT NULL,
-    date TEXT NOT NULL UNIQUE
-  );
-`);
+    try {
+        await db.execAsync(sql);
+    } catch (e) {
+        console.error('Error during DB initialization:', e);
+    }
+    console.log('Database initialized');
 }
-// Insert or update a food entry for a specific date
-// if id exists, update the entry
-export async function insertEntry(
-    date: string | Date,
-    entry: FoodEntry,
-) {
-    const db = await getDB();
 
+export async function getDateId(date: string | Date) {
+    const db = await getDB();
     if (date instanceof Date) {
         date = getDayKey(date);
     }
@@ -110,6 +133,20 @@ export async function insertEntry(
     if (!dayId) {
         throw new Error('Failed to retrieve day ID after insertion.');
     }
+    return dayId;
+}
+
+// Insert or update a food entry for a specific date
+// if id exists, update the entry
+export async function insertEntry(
+    date: string | Date,
+    entry: FoodEntry,
+) {
+    const db = await getDB();
+
+    const dayId = await getDateId(date);
+
+    // Insert food into foods table if it doesn't exist
     await db.runAsync(
         `INSERT OR IGNORE INTO foods (
             id, 
@@ -152,6 +189,41 @@ export async function insertEntry(
             entry.time
         ]
     );
+    return result.lastInsertRowId;
+}
+
+export async function insertUserFood(entry: userFood): Promise<number> {
+    const db = await getDB();
+
+    // Insert food into foods table if it doesn't exist
+    let result = await db.runAsync(
+        `INSERT OR IGNORE INTO user_foods (
+            id, 
+            upc, 
+            name, 
+            calories, 
+            category, 
+            brand, 
+            serving_size_g, 
+            serving_text, 
+            protein, 
+            fat, 
+            carbs
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+        [
+            entry.upc ?? '',
+            entry.name,
+            entry.calories,
+            entry.category ?? null,
+            entry.brand ?? null,
+            entry.serving_size_g ?? null,
+            entry.serving_text ?? null,
+            entry.protein ?? null,
+            entry.fat ?? null,
+            entry.carbs ?? null
+        ]
+    );
+    const userFoodId = result.lastInsertRowId;
     return result.lastInsertRowId;
 }
 

@@ -4,6 +4,7 @@ import type { FoodEntry } from "../utils/db";
 export type RootTabParamList = {
     Home: undefined;
     GoalScreen: undefined;
+    CreateFoodScreen: undefined;
 };
 
 export type RootStackParamList = {

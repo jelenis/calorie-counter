@@ -20,6 +20,8 @@ import * as db from '@utils/db';
 import { fetchSearchResults } from '@utils/api';
 import { useFocusEffect } from '@react-navigation/native';
 
+const MINIMUM_SEARCH_LEN = 3;
+
 type Props = NativeStackScreenProps<ModalStackParamList, 'AddScreen'>;
 
 function useRecents(query: string) {
@@ -66,7 +68,7 @@ export default function AddScreen({ route, navigation }: Props) {
     const { isError, isFetching, data, error } = useQuery({
         queryKey: [trimmedValue],
         queryFn: () => fetchSearchResults(trimmedValue),
-        enabled: trimmedValue.length > 3 && recents.length < 15,
+        enabled: trimmedValue.length > MINIMUM_SEARCH_LEN && recents.length < 15,
         placeholderData: (prev) => {
             return prev;
         },
@@ -149,8 +151,8 @@ function AutoCompleteSuggestion({ item, index, onPress, isFetching }:
             style={[styles.suggestionContainer, index === 0 ? { borderTopWidth: 1, borderTopColor: '#EEE' } : {}]}>
             <TouchRipple onPress={onPress} color={colors.ripple} style={styles.suggestionTextContainer}>
                 <Text style={[styles.name, isFetching ? styles.suggestionPending : {}]}>{item.name}</Text>
-                {item.brand && <Text style={styles.brand}>{item.brand}</Text>}
-                {item.calories && <Text style={styles.calories}>{(item.calories * item.serving_size_g).toFixed(0)} Cal</Text>}
+                {Boolean(item.brand) && <Text style={styles.brand}>{item.brand}</Text>}
+                {Boolean(item.calories) && <Text style={styles.calories}>{(item.calories * item.serving_size_g).toFixed(0)} Cal</Text>}
             </TouchRipple >
         </View >
     );
