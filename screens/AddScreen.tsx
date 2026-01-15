@@ -4,7 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { use, useDeferredValue, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import AddEntryMenu from '@components/entries/AddEntryMenu';
-import type { ModalStackParamList } from '../types/navigation';
+import type { ModalStackParamList } from '@utils/types';
 
 import { useQuery } from '@tanstack/react-query';
 
@@ -102,11 +102,12 @@ export default function AddScreen({ route, navigation }: Props) {
         setModalVisible(true);
     };
     const addFoodEntry = async (item: EmptyFoodEntry) => {
+
         if (route.params?.dateStr) {
             try {
                 await insertEntry(route.params.dateStr, item as FoodEntry);
             } catch (e) {
-                console.error('Error inserting entry:', e);
+                console.error(e.message);
             }
         }
     };

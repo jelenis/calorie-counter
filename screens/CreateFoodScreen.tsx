@@ -4,9 +4,8 @@ import { useState, useEffect } from "react";
 import { Alert } from 'react-native';
 import { cardShadow } from '@styles/card';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
 import { RippleButton } from '@components/feedback';
-import type { userFood } from '@utils/db';
+import type { EmptyFoodEntry } from '@utils/db';
 import * as db from '@utils/db';
 import { RootTabParamList, UNIT_TO_GRAMS } from '@utils/types';
 import * as z from 'zod';
@@ -43,7 +42,7 @@ export default function CreateFoodScreen({ navigation }: Props) {
     const [fatText, setFatText] = useState('');
     const [mealName, setMealName] = useState('');
     const [brandName, setBrandName] = useState('');
-    const [servingSize, setServingSize] = useState('100 g');
+    const [servingSize, setServingSize] = useState('1 g');
 
     async function saveFood() {
         const food = {
@@ -66,8 +65,11 @@ export default function CreateFoodScreen({ navigation }: Props) {
         }
 
         const validFood = parseResult.data;
-        const servingSizeFactor = validFood.servingSize.value * UNIT_TO_GRAMS[validFood.servingSize.unit ?? 'g'];
-        const normalizedFood: userFood = {
+        const servingSizeFactor
+            = validFood.servingSize.value * UNIT_TO_GRAMS[validFood.servingSize.unit ?? 'g'];
+
+        const normalizedFood: EmptyFoodEntry = {
+            server_id: null, // does not exit on the server
             name: validFood.name,
             brand: validFood.brand,
             calories: validFood.calories * servingSizeFactor,
@@ -76,17 +78,16 @@ export default function CreateFoodScreen({ navigation }: Props) {
             carbs: validFood.carbs * servingSizeFactor,
             serving_size_g: servingSizeFactor,
             serving_text: servingSize,
-
             category: null, // User foods have no category
         };
-        const res = await db.insertUserFood(normalizedFood);
+        const res = await db.insertEntry(new Date(), normalizedFood as db.FoodEntry);
         console.log('Inserted user food with ID:', res);
         return res;
     }
     return (
         <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
             <Pressable style={styles.container} onPress={Keyboard.dismiss}>
-                <View style={[{ backgroundColor: colors.textPrimary, borderRadius: 10 }]}>
+                <View style={styles.backgroundContainer}>
                     <View>
                         <Text style={{ color: 'white', fontSize: 25, fontWeight: '600', padding: 15 }}>
                             Create a Meal
@@ -109,7 +110,16 @@ export default function CreateFoodScreen({ navigation }: Props) {
                         <TextInput
                             value={servingSize}
                             onChangeText={setServingSize}
-                            style={styles.servingSize} />
+                            style={styles.servingSize}
+                            onBlur={() => {
+                                const parsed = servingSizeSchema.safeParse(servingSize);
+                                if (parsed.success) {
+                                    const { unit, value } = parsed.data;
+                                    setServingSize(`${value} ${unit || 'g'}`);
+                                } else {
+                                    setServingSize(parseFloat(servingSize).toString() + ' g');
+                                }
+                            }} />
 
                         <Text style={[styles.title, { marginTop: 15 }]}>Fill in the nutrition facts</Text>
                         <View style={{
@@ -189,6 +199,10 @@ export default function CreateFoodScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
+    backgroundContainer: {
+        backgroundColor: colors.textPrimary,
+        borderRadius: 30
+    },
     buttonContainer: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
@@ -221,7 +235,7 @@ const styles = StyleSheet.create({
     innerContainer: {
         alignItems: 'flex-start',
         padding: 15,
-        borderRadius: 4,
+        borderRadius: 30,
         backgroundColor: 'white',
         paddingBottom: 25,
         maxWidth: 650
