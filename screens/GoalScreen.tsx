@@ -154,7 +154,6 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
     },
-
     container: {
         flex: 1,
         paddingTop: 25,

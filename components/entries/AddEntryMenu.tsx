@@ -9,7 +9,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import colors from '@styles/colors';
 import { ToggleListButton } from '@components/ui/ToggleButton';
 import { useNavigation } from '@react-navigation/native';
-
+import { UNIT_TO_GRAMS, type Unit } from '@utils/types';
 type AddEntryMenuProps = {
     selectedItem: EmptyFoodEntry | null;
     addFoodEntry: (item: EmptyFoodEntry) => Promise<void>;
@@ -17,7 +17,6 @@ type AddEntryMenuProps = {
     closeModal: () => void;
 }
 
-type Unit = 'serving' | 'g' | 'oz' | 'lb';
 type MealTime = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 const servingSizeSchema = z.string().refine((val: string) => {
     const num = parseFloat(val);
@@ -25,6 +24,8 @@ const servingSizeSchema = z.string().refine((val: string) => {
 }, {
     message: 'Serving size must be a positive number',
 });
+
+
 
 export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEntry, closeModal }: AddEntryMenuProps) {
     const [servingSizeText, setServingSizeText] = React.useState('');
@@ -35,7 +36,6 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
 
     // Validate servingSizeText before calculations
     // zod for validating serving size input
-
     const isServingSizeValid = servingSizeSchema.safeParse(servingSizeText).success;
     const parsedServingSize = isServingSizeValid ? parseFloat(servingSizeText) : 0;
 
@@ -46,9 +46,9 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
     }
     const conversionMap: Record<Unit, number> = {
         'serving': defaultServingSize,
-        'g': 1,
-        'oz': 28.3495,
-        'lb': 453.592,
+        'g': UNIT_TO_GRAMS['g'],
+        'oz': UNIT_TO_GRAMS['oz'],
+        'lb': UNIT_TO_GRAMS['lb'],
     }
     // default calories state
     const [caloriesText, setCaloriesText] = React.useState('');

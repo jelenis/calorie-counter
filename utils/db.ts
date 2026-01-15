@@ -24,7 +24,7 @@ export type FoodEntry = Food & {
     time: 'breakfast' | 'lunch' | 'dinner' | 'snack';
     quantity: number;
 }
-export type userFood = Omit<Food, 'id'>;
+export type userFood = Omit<Food, 'id' | 'upc'>;
 
 export type EmptyFoodEntry = Food & Partial<FoodEntry>;
 
@@ -36,18 +36,16 @@ export async function getDB() {
 
     return db;
 }
-
+// DROP TABLE IF EXISTS entries;
+// DROP TABLE IF EXISTS foods;
+// DROP TABLE IF EXISTS days;
+// DROP TABLE IF EXISTS user_foods;
 async function initialize(db: SQLite.SQLiteDatabase) {
 
 
     const sql = `
         PRAGMA journal_mode = WAL;
         PRAGMA foreign_keys = ON;
-        
-        DROP TABLE IF EXISTS entries;
-        DROP TABLE IF EXISTS foods;
-        DROP TABLE IF EXISTS days;
-        DROP TABLE IF EXISTS user_foods;
         
         CREATE TABLE IF NOT EXISTS days (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -192,14 +190,14 @@ export async function insertEntry(
     return result.lastInsertRowId;
 }
 
-export async function insertUserFood(entry: userFood): Promise<number> {
+export async function insertUserFood(food: userFood): Promise<number | null> {
     const db = await getDB();
 
     // Insert food into foods table if it doesn't exist
-    let result = await db.runAsync(
-        `INSERT OR IGNORE INTO user_foods (
-            id, 
-            upc, 
+    const dayId = await getDateId(new Date());
+    try {
+        let result = await db.runAsync(
+            `INSERT OR IGNORE INTO user_foods (
             name, 
             calories, 
             category, 
@@ -209,22 +207,51 @@ export async function insertUserFood(entry: userFood): Promise<number> {
             protein, 
             fat, 
             carbs
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
-        [
-            entry.upc ?? '',
-            entry.name,
-            entry.calories,
-            entry.category ?? null,
-            entry.brand ?? null,
-            entry.serving_size_g ?? null,
-            entry.serving_text ?? null,
-            entry.protein ?? null,
-            entry.fat ?? null,
-            entry.carbs ?? null
-        ]
-    );
-    const userFoodId = result.lastInsertRowId;
-    return result.lastInsertRowId;
+        ) VALUES ( ?, ?,  ?, ?, ?,  ?, ?, ?,  ?);`,
+            [
+                food.name,
+                food.calories,
+                food.category ?? null,
+                food.brand ?? null,
+                food.serving_size_g ?? null,
+                food.serving_text ?? null,
+                food.protein ?? null,
+                food.fat ?? null,
+                food.carbs ?? null
+            ]
+        );
+        const entry = {
+            ...food,
+            user_food_id: result.lastInsertRowId,
+            quantity: 1,
+            time: 'snack' // will make this selectable later
+        }
+        result = await db.runAsync(
+            `INSERT OR REPLACE INTO entries (
+             quantity, day_id, user_food_id, time
+        ) VALUES (?,?,?,?);`,
+            [
+                entry.quantity,
+                dayId,
+                entry.user_food_id,
+                entry.time
+            ]
+        );
+
+        const useFoodEntryId = result.lastInsertRowId;
+        console.log('Inserted user food entry with ID:', useFoodEntryId);
+        const foods = await db.getAllAsync<FoodEntry>(
+            `SELECT DISTINCT * from entries WHERE user_food_id IS NOT NULL;`,
+
+        );
+        console.log('All user food entries:', foods);
+
+
+        return useFoodEntryId;
+    } catch (e) {
+        console.error('Error inserting user food:', e);
+        return null;
+    }
 }
 
 export async function getRecents(): Promise<FoodEntry[]> {
@@ -258,17 +285,36 @@ export async function getEntriesByDate(date: string | Date): Promise<FoodEntry[]
     }
 
     const entries = await db.getAllAsync<FoodEntry>(
-        `SELECT f.* ,e.* FROM entries e
-         JOIN days d ON e.day_id = d.id
-         JOIN foods f ON  f.id = e.food_id
-         WHERE d.date = ? 
-         ORDER BY CASE e.time
+        `SELECT
+        e.id,
+        e.time,
+        e.quantity,
+        e.day_id,
+
+        COALESCE(f.upc, NULL) as upc,
+        COALESCE(f.name, uf.name) as name,
+        COALESCE(f.calories, uf.calories) as calories,
+        COALESCE(f.brand, uf.brand) as brand,
+        COALESCE(f.serving_size_g, uf.serving_size_g) as serving_size_g,
+        COALESCE(f.serving_text, uf.serving_text) as serving_text,
+        COALESCE(f.protein, uf.protein) as protein,
+        COALESCE(f.fat, uf.fat) as fat,
+        COALESCE(f.carbs, uf.carbs) as carbs
+
+        FROM entries e
+        JOIN days d ON d.id = e.day_id
+        LEFT JOIN foods f ON f.id = e.food_id
+        LEFT JOIN user_foods uf ON uf.id = e.user_food_id
+        WHERE d.date = ?
+        ORDER BY
+        CASE e.time
             WHEN 'breakfast' THEN 1
             WHEN 'lunch' THEN 2
             WHEN 'dinner' THEN 3
             WHEN 'snack' THEN 4
             ELSE 5
-         END, e.id ASC;`,
+        END,
+        e.id;`,
         date
     );
 

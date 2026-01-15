@@ -30,7 +30,7 @@ import { Query, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // react navigation
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import type { ModalStackParamList, RootTabParamList } from './types/navigation';
+import type { ModalStackParamList, RootTabParamList } from '@utils/types';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -100,7 +100,6 @@ function TabBar() {
 }
 function HomeStack() {
   return (
-
     <ModalStack.Navigator screenOptions={{ headerShown: false }}>
       <ModalStack.Screen name="HomeScreen" component={HomeScreen} />
       <ModalStack.Screen

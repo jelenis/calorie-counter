@@ -1,3 +1,6 @@
+export type Unit = 'serving' | 'g' | 'oz' | 'lb';
+export const UNIT_TO_GRAMS: Record<string, number> = { g: 1, kg: 1000, oz: 28.3495, lb: 453.592, ml: 1, l: 1000 };
+
 import type { FoodEntry } from "../utils/db";
 
 

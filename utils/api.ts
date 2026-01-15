@@ -3,10 +3,10 @@ const sampleFoodEntries: Food[] = [{ "brand": "Taifun", "calories": 1.9024856, "
 import Constants from "expo-constants";
 export async function fetchSearchResults(query: string) {
     // in development mode, return sample data
-    if (Constants.executionEnvironment == 'storeClient') {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return normalizedEntries(sampleFoodEntries);
-    }
+    // if (Constants.executionEnvironment == 'storeClient') {
+    //     await new Promise(resolve => setTimeout(resolve, 500));
+    //     return normalizedEntries(sampleFoodEntries);
+    // }
     console.log(`${process.env.EXPO_PUBLIC_API_URL}?q=${encodeURIComponent(query)}`);
     const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}?q=${encodeURIComponent(query)}`);
     if (response.ok) {
