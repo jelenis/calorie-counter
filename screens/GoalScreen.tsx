@@ -20,8 +20,6 @@ export default function GoalScreen() {
     const [containerHeight, setContainerHeight] = useState(0);
     const [contentHeight, setContentHeight] = useState(0);
 
-    console.log('GoalScreen rendered with macros:', { calories, protein, carbs, fat });
-
     async function loadMacrosForToday() {
         try {
             const macros = await getMacros();
@@ -31,7 +29,6 @@ export default function GoalScreen() {
                 setCarbs(macros.carbs);
                 setFat(macros.fat);
             }
-            console.log('Loaded macros:', macros);
         } catch (e) {
             console.error('Error loading macros:', e);
         }

@@ -1,7 +1,7 @@
 import type { ListRenderItemInfo } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import React, { useDeferredValue, useEffect, useMemo } from 'react';
+import React, { use, useDeferredValue, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import AddEntryMenu from '@components/entries/AddEntryMenu';
 import type { ModalStackParamList } from '../types/navigation';
@@ -18,6 +18,7 @@ import type { EmptyFoodEntry } from '@utils/db';
 
 import * as db from '@utils/db';
 import { fetchSearchResults } from '@utils/api';
+import { useFocusEffect } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<ModalStackParamList, 'AddScreen'>;
 
@@ -34,7 +35,13 @@ function useRecents(query: string) {
     }, []);
     useEffect(() => {
         const regex = new RegExp(query, 'gi');
-        setFilteredRecents(recents.filter((row) => regex.test(row.name)));
+        if (query.length === 0) {
+            console.log('Setting filtered recents to all recents');
+            setFilteredRecents([...recents]);
+        } else {
+            console.log('Setting filtered recents to filtered list');
+            setFilteredRecents(recents.filter((row) => regex.test(row.name)));
+        }
     }, [query, recents]);
 
     return filteredRecents;
@@ -48,23 +55,22 @@ export default function AddScreen({ route, navigation }: Props) {
     const [modalVisible, setModalVisible] = React.useState(false);
     const [selectedItem, setSelectedItem] = React.useState<EmptyFoodEntry | null>(null);
 
+
+
     // Derived input values
     const trimmedValue = debouncedValue.trim().toLowerCase();
     const recents = useRecents(trimmedValue);
-    console.log('Recents:', recents.length);
-    // Search query
 
-    const { isError, data, error } = useQuery({
+
+    // Search query
+    const { isError, isFetching, data, error } = useQuery({
         queryKey: [trimmedValue],
         queryFn: () => fetchSearchResults(trimmedValue),
         enabled: trimmedValue.length > 3 && recents.length < 15,
         placeholderData: (prev) => {
-            if (trimmedValue.length === 0) {
-                console.log('Using placeholder data for empty query');
-                return undefined;
-            }
             return prev;
         },
+
     });
 
     // Log errors once
@@ -77,7 +83,12 @@ export default function AddScreen({ route, navigation }: Props) {
     // Prefer server results, fall back to recents for short queries
     const results: EmptyFoodEntry[] = useMemo(() => {
         if (data && data.length > 0) return data;
-        if (trimmedValue.length <= 3) return recents;
+        if (trimmedValue.length <= 3) {
+            // on first render with short query, show recents
+
+            console.log('setting firstRef to false');
+            return recents;
+        }
         return [];
     }, [data, recents, trimmedValue]);
 
@@ -97,6 +108,7 @@ export default function AddScreen({ route, navigation }: Props) {
             }
         }
     };
+    console.log(isFetching ? 'Fetching search results...' : `Found ${results.length} results.`);
 
     return (
         <>
@@ -112,6 +124,7 @@ export default function AddScreen({ route, navigation }: Props) {
                             item={info.item}
                             index={info.index}
                             onPress={() => onPressHandler(info)}
+                            isFetching={isFetching}
                         />
                     )}
                     placeholder='Search for a food..'
@@ -129,18 +142,21 @@ export default function AddScreen({ route, navigation }: Props) {
     );
 }
 
-function AutoCompleteSuggestion({ item, index, onPress }: { item: any; index: number; onPress: () => void }) {
+function AutoCompleteSuggestion({ item, index, onPress, isFetching }:
+    { item: any; index: number; onPress: () => void; isFetching: boolean }) {
     return (
         <View
             style={[styles.suggestionContainer, index === 0 ? { borderTopWidth: 1, borderTopColor: '#EEE' } : {}]}>
             <TouchRipple onPress={onPress} color={colors.ripple} style={styles.suggestionTextContainer}>
-                <Text style={styles.name}>{item.name}</Text>
+                <Text style={[styles.name, isFetching ? styles.suggestionPending : {}]}>{item.name}</Text>
                 {item.brand && <Text style={styles.brand}>{item.brand}</Text>}
                 {item.calories && <Text style={styles.calories}>{(item.calories * item.serving_size_g).toFixed(0)} Cal</Text>}
             </TouchRipple >
         </View >
     );
 }
+
+
 
 const styles = StyleSheet.create({
     container: {
@@ -164,6 +180,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         width: '100%',
         alignItems: 'flex-start',
+    },
+    suggestionPending: {
+        opacity: 0.5,
+        color: colors.textSubtle,
     },
     name: {
         fontSize: 18,

@@ -1,5 +1,6 @@
 import React, { use, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { z } from 'zod';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 
 import { RippleButton, ToggleButton } from '@components/ui';
 import type { EmptyFoodEntry, FoodEntry } from '@utils/db';
@@ -20,7 +21,17 @@ type Unit = 'serving' | 'g' | 'oz' | 'lb';
 type MealTime = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
 export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEntry, closeModal }: AddEntryMenuProps) {
+    const [servingSizeText, setServingSizeText] = React.useState('');
     const [servingSize, setServingSize] = React.useState(1);
+
+    // zod for validating serving size input
+    const servingSizeSchema = z.string().refine((val: string) => {
+        const num = parseFloat(val);
+        return !isNaN(num) && num > 0;
+    }, {
+        message: 'Serving size must be a positive number',
+    });
+
     const [selectedUnit, setSelectedUnit] = React.useState<Unit>('g');
     const [time, setTime] = React.useState<MealTime>('breakfast');
     const defaultServingSize = selectedItem?.serving_size_g || 1;
@@ -39,10 +50,10 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
     useEffect(() => {
         if (selectedItem?.serving_text && selectedItem.serving_size_g) {
             if (isEditing && selectedItem.quantity) {
-                setServingSize(selectedItem.quantity * conversionMap[selectedUnit]);
+                setServingSizeText((selectedItem.quantity * conversionMap[selectedUnit]).toFixed(1));
             } else {
 
-                setServingSize(selectedItem.serving_size_g);
+                setServingSizeText(selectedItem.serving_size_g.toFixed(1));
             }
         }
     }, [selectedItem?.serving_text, selectedItem?.serving_size_g])
@@ -51,10 +62,20 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
         return <View><Text>Whoops! No item selected</Text></View>;
     }
 
-    const totCals = selectedItem ? (selectedItem.calories ?? 0) * conversionMap[selectedUnit] * servingSize : 0;
-    const totProtein = selectedItem?.protein !== undefined ? selectedItem.protein * conversionMap[selectedUnit] * servingSize : 0;
-    const totCarbs = selectedItem?.carbs !== undefined ? selectedItem.carbs * conversionMap[selectedUnit] * servingSize : 0;
-    const totFat = selectedItem?.fat !== undefined ? selectedItem.fat * conversionMap[selectedUnit] * servingSize : 0;
+    // Validate servingSizeText before calculations
+    const isServingSizeValid = servingSizeSchema.safeParse(servingSizeText).success;
+    const parsedServingSize = isServingSizeValid ? parseFloat(servingSizeText) : 0;
+
+    function calcNutrient(nutrient: number | undefined) {
+        return isServingSizeValid && nutrient !== undefined
+            ? nutrient * conversionMap[selectedUnit] * parsedServingSize
+            : 0;
+    }
+
+    const totCals = calcNutrient(selectedItem?.calories);
+    const totProtein = calcNutrient(selectedItem?.protein);
+    const totCarbs = calcNutrient(selectedItem?.carbs);
+    const totFat = calcNutrient(selectedItem?.fat);
     const brand = selectedItem?.brand || null;
 
     const defaultUnits = [
@@ -114,11 +135,11 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                             keyboardType='number-pad'
                             style={styles.quantityInput}
                             containerStyle={styles.quantityContainer}
-                            defaultValue={servingSize.toString()} onChangeText={(text) => {
+                            defaultValue={servingSizeText} onChangeText={(text) => {
                                 const value = parseFloat(text);
-                                if (!isNaN(value)) {
-                                    setServingSize(value);
-                                }
+                                setServingSizeText(text);
+                                setServingSize(value);
+
                             }} />
                     </View>
                     <View style={styles.servingSizePickerContainer}>
@@ -132,6 +153,14 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                             searchPlaceholder="Search..."
                             value={selectedUnit}
                             onChange={item => {
+                                const newUnit = item.value as Unit;
+                                const prevUnit = selectedUnit;
+
+
+                                // nomralize to grams and convert to new unit
+                                const newServingSize = (servingSize * conversionMap[prevUnit]) / conversionMap[newUnit];
+                                setServingSize(newServingSize);
+                                setServingSizeText(newServingSize.toFixed(1));
                                 setSelectedUnit(item.value);
                             }}
                             renderItem={(item) =>
@@ -148,13 +177,20 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                     closeModal();
                 }} />}
                 <RippleButton style={styles.saveButton} text="Save" onPress={async () => {
+
+                    if (servingSizeText.trim() === '' || !isServingSizeValid) {
+                        Alert.alert('Oops!', 'Please enter a valid serving size.');
+                        return;
+                    }
+
                     if (selectedItem) {
                         await addFoodEntry({
                             ...selectedItem,
-                            quantity: servingSize * conversionMap[selectedUnit],
+                            quantity: parseFloat(servingSizeText) * conversionMap[selectedUnit],
                             time
                         });
                     }
+
                     closeModal();
                     if (navigation && !isEditing) {
                         navigation.goBack();

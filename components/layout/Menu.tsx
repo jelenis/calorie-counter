@@ -20,7 +20,7 @@ export default function Menu({ visible, setVisible, children, }: MenuProps) {
             setModalVisible(true);
             opacity.value = withTiming(1, { duration: 300 });
         } else {
-            console.log('Starting fade out animation');
+
             opacity.value = withTiming(0, { duration: 300 }, (finished) => {
                 if (finished) {
                     scheduleOnRN(setModalVisible, false);
@@ -45,7 +45,6 @@ export default function Menu({ visible, setVisible, children, }: MenuProps) {
             <Animated.View style={[{ flex: 1 }, animatedStyle]}  >
                 <Pressable style={[styles.modalBackground, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
                     onPress={() => {
-                        console.log('Background pressed, closing menu');
                         setVisible(false)
                     }}>
                     <Pressable onPress={() => { }} style={styles.modalView}>

@@ -6,7 +6,8 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "credentialsSource": "local"
     },
     "ios-simulator": {
       "extends": "development",
@@ -15,7 +16,8 @@
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "credentialsSource": "local"
     },
     "production": {
       "autoIncrement": true

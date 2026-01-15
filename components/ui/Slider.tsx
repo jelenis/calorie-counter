@@ -1,7 +1,7 @@
 
 import { View, StyleSheet, Text } from 'react-native';
 import colors from '@styles/colors';
-import Animated, { Extrapolation, useAnimatedStyle, useSharedValue, interpolate, runOnJS, useAnimatedReaction, LinearTransition, withSpring } from 'react-native-reanimated';
+import Animated, { Extrapolation, useAnimatedStyle, useSharedValue, interpolate, runOnJS, useAnimatedReaction, LinearTransition, withSpring, withTiming } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { scheduleOnRN } from 'react-native-worklets';
 import { useMemo, useEffect, useState } from 'react';
@@ -65,13 +65,7 @@ export default function Slider({
             // quantize to step
             steppedValue.value = Math.round(raw / step) * step;
             // re-interpolate to position
-            knobX.value = withSpring(interpolate(steppedValue.value, [min, max], [0, inputMax], Extrapolation.CLAMP),
-                {
-                    damping: 300,
-                    stiffness: 300,
-                    mass: 1,
-                }
-            );
+            knobX.value = interpolate(steppedValue.value, [min, max], [0, inputMax], Extrapolation.CLAMP)
 
         }).onEnd(() => {
             isPanning.value = false;
@@ -116,8 +110,6 @@ export default function Slider({
                         position: 'absolute',
                         top: 8,
                         minWidth: 50,
-                        // left: '50%',
-                        transform: [{ translateX: -25 }],
                         fontSize: 10,
                         color: "rgba(0,0,0,0.5)",
                         textAlign: 'center',
