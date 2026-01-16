@@ -66,6 +66,7 @@ function groupByMeal(rows: FoodEntry[]): { time: string; data: FoodEntry[] }[] {
         { time: 'Snacks', data: rows.filter(e => e.time === 'snack'), },
     ];
 }
+
 type Macro = { calories: number; protein: number; carbs: number; fat: number }
 export default function HomeScreen({ navigation, params }: { navigation: any; params?: { foodEntry?: FoodEntry } }) {
     const [entries, setEntries] = useState<any[]>([]);

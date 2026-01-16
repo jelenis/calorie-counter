@@ -174,7 +174,6 @@ export async function insertEntry(
             entry.time
         ]
     );
-    console.log('Inserted/Updated entry with ID:', result.lastInsertRowId);
     return result.lastInsertRowId;
 }
 
@@ -198,7 +197,10 @@ export async function deleteEntry(entryId: number) {
 }
 
 export function getDayKey(date: Date): string {
-    return date.toISOString().slice(0, 10); // "2026-01-08"
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 export async function getEntriesByDate(date: string | Date): Promise<FoodEntry[]> {
