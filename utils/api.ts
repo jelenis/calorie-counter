@@ -7,7 +7,6 @@ export async function fetchSearchResults(query: string) {
     //     await new Promise(resolve => setTimeout(resolve, 500));
     //     return normalizedEntries(sampleFoodEntries);
     // }
-    console.log(`${process.env.EXPO_PUBLIC_API_URL}?q=${encodeURIComponent(query)}`);
     const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}?q=${encodeURIComponent(query)}`);
     if (response.ok) {
         const data = await response.json() as Food[];

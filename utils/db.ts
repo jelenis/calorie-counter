@@ -99,7 +99,6 @@ async function initialize(db: SQLite.SQLiteDatabase) {
     } catch (e) {
         console.error('Error during DB initialization:', e);
     }
-    console.log('Database initialized');
 }
 
 export async function getDateId(date: string | Date) {
@@ -162,7 +161,6 @@ export async function insertEntry(
             entry.carbs ?? null
         ]
     );
-    console.log('Inserted food with ID:', result.lastInsertRowId);
     // Insert or update entry
     result = await db.runAsync(
         `INSERT OR REPLACE INTO entries (

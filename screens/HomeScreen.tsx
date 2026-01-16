@@ -86,7 +86,6 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
     const fetchCaloriesForToday = useCallback(async () => {
         try {
             const entries = await db.getEntriesByDate(currentDate);
-            console.log(JSON.stringify(entries, null, 2));
             setEntries(entries);
         } catch (e) {
             console.error('Error fetching entries:', e);

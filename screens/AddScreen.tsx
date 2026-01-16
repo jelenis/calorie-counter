@@ -38,10 +38,8 @@ function useRecents(query: string) {
     useEffect(() => {
         const regex = new RegExp(query, 'gi');
         if (query.length === 0) {
-            console.log('Setting filtered recents to all recents');
             setFilteredRecents([...recents]);
         } else {
-            console.log('Setting filtered recents to filtered list');
             setFilteredRecents(recents.filter((row) => regex.test(row.name)));
         }
     }, [query, recents]);
@@ -87,8 +85,6 @@ export default function AddScreen({ route, navigation }: Props) {
         if (data && data.length > 0) return data;
         if (trimmedValue.length <= 3) {
             // on first render with short query, show recents
-
-            console.log('setting firstRef to false');
             return recents;
         }
         return [];
@@ -111,7 +107,6 @@ export default function AddScreen({ route, navigation }: Props) {
             }
         }
     };
-    console.log(isFetching ? 'Fetching search results...' : `Found ${results.length} results.`);
 
     return (
         <>

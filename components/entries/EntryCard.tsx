@@ -2,7 +2,6 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import colors from '@styles/colors';
 import { cardShadow } from '@styles/card';
 import { FoodEntry } from '@utils/db';
-import AntDesign from '@expo/vector-icons/AntDesign';
 
 type EntryCardProps = {
     data: FoodEntry
@@ -15,9 +14,9 @@ export default function EntryCard({ data, onPress, onDelete }: EntryCardProps) {
     return (
         <Pressable onPress={onPress} style={styles.container}>
             <Text style={styles.calories}>{Math.round(calories * quantity)} Cal</Text>
-            <Text style={styles.name}>{name.slice(0, 40)}</Text>
+            <Text style={styles.name}>{name.slice(0, 30)}</Text>
             <View style={styles.row}>
-                <Text style={styles.brand}>{brand}</Text>
+                <Text style={styles.brand}>{brand?.slice(0, 40)}</Text>
             </View>
             <View style={styles.row}>
                 <Text style={styles.brand}>{Math.round(quantity)} g</Text>

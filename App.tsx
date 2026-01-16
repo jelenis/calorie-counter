@@ -60,7 +60,7 @@ function TabBar() {
         tabBarActiveTintColor: colors.textPrimary,
         headerShown: false,
         popToTopOnBlur: true,
-        tabBarStyle: { alignContent: 'center', paddingTop: '2%', height: '9%' },
+        tabBarStyle: { alignContent: 'center', paddingTop: '2%', height: 80 },
       }}
     >
       <Tab.Screen
@@ -86,7 +86,6 @@ function TabBar() {
       <Tab.Screen
         name="CreateFoodScreen"
         options={{
-
           tabBarLabel: 'Create',
           tabBarIcon: ({ focused, color, size }) => {
             return <MaterialCommunityIcons name="silverware-fork-knife" size={size} color={color} />

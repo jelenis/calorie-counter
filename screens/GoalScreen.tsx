@@ -158,6 +158,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingTop: 25,
         paddingHorizontal: 20,
+        backgroundColor: colors.background,
     },
     section: {
         gap: 12,
