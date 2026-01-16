@@ -1,10 +1,10 @@
 
-import { View, Text, StyleSheet, Button, TextInput, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Button, TextInput, FlatList, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useCallback, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { SectionList } from 'react-native';
-import Animated, { FadeIn, FadeInDown, FadeInUp, FadeOut, FadeOutDown, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInUp, FadeOut, FadeOutDown, interpolate, Layout, LinearTransition, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import colors from '@styles/colors';
 import AddButton from '@components/ui/AddButton';
@@ -145,6 +145,7 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
                 // Disable forward button if currentDate is today or later
                 forwardDisabled={currentDate < new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())}
                 date={currentDate} />
+
             {/* total calories */}
             {hasEntries ? (
                 <>
@@ -167,19 +168,15 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
                             }}
                         />
                     </Animated.View>
+                    {/* Floating add button  */}
+                    <AddButton onPress={() => navigation.navigate('AddScreen', {
+                        dateStr: db.getDayKey(currentDate)
+                    })} />
                 </>
             ) : (
-                <Animated.View entering={FadeIn} exiting={FadeOut} style={{ justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
-                    <Text style={{ fontSize: 16, color: colors.textSubtle, textAlign: 'center', lineHeight: 24 }}>
-                        No entries for this day.{"\n"}Tap + to add.
-                    </Text>
-                </Animated.View>
+                <FakeSearchBar navigation={navigation} currentDate={currentDate} />
             )}
 
-            {/* Floating add button  */}
-            <AddButton onPress={() => navigation.navigate('AddScreen', {
-                dateStr: db.getDayKey(currentDate)
-            })} />
 
             {/* Add Entry Menu Modal */}
             <Menu visible={modalVisible} setVisible={setModalVisible}>
@@ -193,6 +190,46 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
             </Menu>
         </SafeAreaView>
     )
+}
+
+import EvilIcons from '@expo/vector-icons/EvilIcons';
+import { cardShadow, inputCard } from '@styles/card';
+import { scheduleOnRN } from 'react-native-worklets';
+function FakeSearchBar({ navigation, currentDate }: { navigation: any, currentDate: Date }) {
+
+    return (
+        <Animated.View
+            style={[{
+                marginTop: 60,
+                flex: 1,
+                width: '80%',
+                maxWidth: 600,
+            },]}
+            entering={FadeInUp}
+            exiting={FadeOutDown}
+        >
+            <Text style={{ textAlign: 'center', color: colors.textSubtle, marginBottom: 32, fontSize: 18 }}>No entries made today.</Text>
+            <Pressable style={[{
+                height: 40,
+                justifyContent: 'center',
+                paddingHorizontal: 10,
+            }, cardShadow, inputCard]}
+
+                onPress={() => {
+                    const date = db.getDayKey(currentDate);
+                    navigation.navigate('AddScreen', {
+                        dateStr: date
+                    });
+
+                }}
+            >
+                <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
+                    <EvilIcons name="search" size={24} color="black" /><Text style={{ color: colors.placeholder }}>Search for a food...</Text>
+                </View>
+            </Pressable>
+
+        </Animated.View>
+    );
 }
 
 const styles = StyleSheet.create({

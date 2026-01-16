@@ -18,7 +18,14 @@ export type SearchInputProps = {
 
 const DEBOUNCE_TIME = 450;
 
-export default function SearchInput({ data, keyExtractor = (item) => item.id, renderItem, onDebounceChange, onChangeText, value, onBackPress, placeholder = 'Search...', ...rest }: SearchInputProps) {
+export default function SearchInput(
+    { data,
+        keyExtractor = (item) => item.id,
+        renderItem,
+        onDebounceChange, onChangeText, value,
+        onBackPress,
+        placeholder = 'Search...',
+        ...rest }: SearchInputProps) {
 
     const debouncedValue = useDebounce(value, DEBOUNCE_TIME);
     const lastEmitted = React.useRef<string>(value);

@@ -1,10 +1,8 @@
 import colors from '@styles/colors';
-import { View, Text, StyleSheet, TextInput, Pressable, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Alert } from 'react-native';
 import { useState, useEffect } from "react";
-import { Alert } from 'react-native';
-import { cardShadow } from '@styles/card';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { RippleButton } from '@components/feedback';
+import MenuCard from '@components/ui/MenuCard';
 import type { EmptyFoodEntry } from '@utils/db';
 import * as db from '@utils/db';
 import { RootTabParamList, UNIT_TO_GRAMS } from '@utils/types';
@@ -84,124 +82,116 @@ export default function CreateFoodScreen({ navigation }: Props) {
         return res;
     }
     return (
-        <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-            <Pressable style={styles.container} onPress={Keyboard.dismiss}>
-                <View style={{ width: '100%', alignSelf: 'flex-start' }}>
-                    <Text style={{ color: colors.textSubtle, fontSize: 28, fontWeight: '800', padding: 15 }}>
-                        Create a Meal
-                    </Text>
-                </View>
-                <View style={[styles.innerContainer, cardShadow]}>
-                    <Text style={[styles.title,]}>Name</Text>
-                    <View style={{ width: '80%', flexDirection: 'row', alignItems: 'center' }}>
-                        <TextInput
-                            value={mealName}
-                            onChangeText={setMealName}
-                            style={styles.mealName}
-                            placeholder="Fuji Apple" />
-                    </View>
-                    <Text style={[styles.title, { marginTop: 15 }]}>Brand Name <Text style={{ opacity: 0.4 }}>(Optional)</Text></Text>
-                    <View style={{ width: '80%', flexDirection: 'row', alignItems: 'center' }}>
-                        <TextInput
-                            value={brandName}
-                            onChangeText={setBrandName}
-                            style={styles.brandName}
-                            placeholder="Healthy Choice Inc" />
-                    </View>
-                    <Text style={[styles.title, { marginTop: 15 }]}>Serving Size</Text>
-                    <View style={{ width: 100, flexDirection: 'row', alignItems: 'center' }}>
-                        <TextInput
-                            value={servingSize}
-                            onChangeText={setServingSize}
-                            style={styles.servingSize}
-                            onBlur={() => {
-                                const parsed = servingSizeSchema.safeParse(servingSize);
-                                if (parsed.success) {
-                                    const { unit, value } = parsed.data;
-                                    setServingSize(`${value} ${unit || 'g'}`);
-                                } else {
-                                    const val = parseFloat(servingSize);
-                                    setServingSize(isNaN(val) ? '1 g' : val + ' g');
-                                }
-                            }} />
-                    </View>
+        <MenuCard title="Create a Meal">
+            <Text style={[styles.title,]}>Name</Text>
+            <View style={{ width: '80%', flexDirection: 'row', alignItems: 'center' }}>
+                <TextInput
+                    value={mealName}
+                    onChangeText={setMealName}
+                    style={styles.mealName}
+                    placeholder="Fuji Apple" />
+            </View>
+            <Text style={[styles.title, { marginTop: 15 }]}>Brand Name <Text style={{ opacity: 0.4 }}>(Optional)</Text></Text>
+            <View style={{ width: '80%', flexDirection: 'row', alignItems: 'center' }}>
+                <TextInput
+                    value={brandName}
+                    onChangeText={setBrandName}
+                    style={styles.brandName}
+                    placeholder="Healthy Choice Inc" />
+            </View>
+            <Text style={[styles.title, { marginTop: 15 }]}>Serving Size</Text>
+            <View style={{ width: 100, flexDirection: 'row', alignItems: 'center' }}>
+                <TextInput
+                    value={servingSize}
+                    onChangeText={setServingSize}
+                    style={styles.servingSize}
+                    onBlur={() => {
+                        const parsed = servingSizeSchema.safeParse(servingSize);
+                        if (parsed.success) {
+                            const { unit, value } = parsed.data;
+                            setServingSize(`${value} ${unit || 'g'}`);
+                        } else {
+                            const val = parseFloat(servingSize);
+                            setServingSize(isNaN(val) ? '1 g' : val + ' g');
+                        }
+                    }} />
+            </View>
 
-                    <Text style={[styles.title, { marginTop: 15 }]}>Macros</Text>
-                    <View style={{
-                        alignContent: 'center',
-                        width: '100%',
-                        flexDirection: 'row',
-                        justifyContent: 'center'
-                    }}>
+            <Text style={[styles.title, { marginTop: 15 }]}>Macros</Text>
+            <View style={{
+                alignContent: 'center',
+                width: '100%',
+                flexDirection: 'row',
+                justifyContent: 'center'
+            }}>
 
-                        <View style={styles.nutrientsContainer}>
-                            <View style={[styles.nutrientRow, { marginBottom: 10, }]}>
-                                <Text style={[styles.nutrientLabel]}>Calories</Text>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <TextInput
-                                        style={styles.nutrientValue}
-                                        value={calorieText}
-                                        onChangeText={setCalorieText}
-                                        keyboardType="numeric"
-                                        placeholder='90'
-                                    />
-                                    <Text style={styles.nutrientUnit}> Cal</Text>
-                                </View>
-                            </View>
-                            <View style={[styles.nutrientRow, styles.oddRow]}>
-                                <Text style={styles.nutrientLabel}>Protein</Text>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <TextInput
-                                        style={styles.nutrientValue}
-                                        value={proteinText}
-                                        onChangeText={setProteinText}
-                                        keyboardType="numeric"
-                                        placeholder='0'
-                                    />
-                                    <Text style={styles.nutrientUnit}> g</Text>
-                                </View>
-                            </View>
-                            <View style={styles.nutrientRow}>
-                                <Text style={styles.nutrientLabel}>Fat</Text>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <TextInput
-                                        style={styles.nutrientValue}
-                                        value={fatText}
-                                        onChangeText={setFatText}
-                                        keyboardType="numeric"
-                                        placeholder='0'
-                                    />
-                                    <Text style={styles.nutrientUnit}> g</Text>
-                                </View>
-                            </View>
-                            <View style={[styles.nutrientRow, styles.oddRow]}>
-                                <Text style={styles.nutrientLabel}>Carbs</Text>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <TextInput
-                                        style={styles.nutrientValue}
-                                        value={carbsText}
-                                        onChangeText={setCarbsText}
-                                        keyboardType="numeric"
-                                        placeholder='0'
-                                    />
-                                    <Text style={styles.nutrientUnit}> g</Text>
-                                </View>
-                            </View>
+                <View style={styles.nutrientsContainer}>
+                    <View style={[styles.nutrientRow, { marginBottom: 10, }]}>
+                        <Text style={[styles.nutrientLabel]}>Calories</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <TextInput
+                                style={styles.nutrientValue}
+                                value={calorieText}
+                                onChangeText={setCalorieText}
+                                keyboardType="numeric"
+                                placeholder='90'
+                            />
+                            <Text style={styles.nutrientUnit}> Cal</Text>
                         </View>
                     </View>
-                    <View style={styles.buttonContainer}>
-                        <RippleButton text="Save" style={styles.saveButton} onPress={async () => {
-                            const ok = await saveFood();
-                            if (ok) navigation.navigate({ name: 'Home', params: undefined });
-                        }} />
+                    <View style={[styles.nutrientRow, styles.oddRow]}>
+                        <Text style={styles.nutrientLabel}>Protein</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <TextInput
+                                style={styles.nutrientValue}
+                                value={proteinText}
+                                onChangeText={setProteinText}
+                                keyboardType="numeric"
+                                placeholder='0'
+                            />
+                            <Text style={styles.nutrientUnit}> g</Text>
+                        </View>
                     </View>
-
+                    <View style={styles.nutrientRow}>
+                        <Text style={styles.nutrientLabel}>Fat</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <TextInput
+                                style={styles.nutrientValue}
+                                value={fatText}
+                                onChangeText={setFatText}
+                                keyboardType="numeric"
+                                placeholder='0'
+                            />
+                            <Text style={styles.nutrientUnit}> g</Text>
+                        </View>
+                    </View>
+                    <View style={[styles.nutrientRow, styles.oddRow]}>
+                        <Text style={styles.nutrientLabel}>Carbs</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <TextInput
+                                style={styles.nutrientValue}
+                                value={carbsText}
+                                onChangeText={setCarbsText}
+                                keyboardType="numeric"
+                                placeholder='0'
+                            />
+                            <Text style={styles.nutrientUnit}> g</Text>
+                        </View>
+                    </View>
                 </View>
-
-            </Pressable>
-        </SafeAreaView>
+            </View>
+            <View style={styles.buttonContainer}>
+                <RippleButton text="Save" style={styles.saveButton} onPress={async () => {
+                    const ok = await saveFood();
+                    if (ok) navigation.navigate({ name: 'Home', params: undefined });
+                }} />
+            </View>
+        </MenuCard>
     );
 }
+
+
+
 
 const styles = StyleSheet.create({
 
@@ -216,34 +206,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
 
     },
-    safeArea: {
-        flex: 1,
-        backgroundColor: colors.background,
-        alignItems: 'center',
-        paddingHorizontal: 10,
-    },
-    container: {
-        alignItems: 'center',
-        backgroundColor: 'transparent',
-        marginTop: 10,
-        maxWidth: 650,
-    },
     title: {
         fontSize: 16,
         marginBottom: 10,
         color: colors.textPrimary,
-    },
-
-    innerContainer: {
-        alignItems: 'flex-start',
-        padding: 15,
-        paddingTop: 35,
-        borderRadius: 30,
-        borderBottomRightRadius: 30,
-        borderBottomLeftRadius: 30,
-        backgroundColor: 'white',
-        paddingBottom: 25,
-
     },
     mealName: {
         fontSize: 18,

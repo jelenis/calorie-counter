@@ -56,6 +56,7 @@ function TabBar() {
   return (
     <Tab.Navigator
       initialRouteName="Home"
+
       screenOptions={{
         tabBarActiveTintColor: colors.textPrimary,
         headerShown: false,
@@ -100,7 +101,14 @@ function TabBar() {
 function HomeStack() {
   return (
     <ModalStack.Navigator screenOptions={{ headerShown: false }}>
-      <ModalStack.Screen name="HomeScreen" component={HomeScreen} />
+      <ModalStack.Screen name="HomeScreen"
+        options={{
+          presentation: 'card',
+          gestureEnabled: true,
+          animationDuration: 300,
+        }}
+
+        component={HomeScreen} />
       <ModalStack.Screen
         name="AddScreen"
         options={{

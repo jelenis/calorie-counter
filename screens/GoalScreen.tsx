@@ -8,6 +8,8 @@ import { useEffect, useState } from 'react';
 import Slider from '@components/ui/Slider';
 import { RippleButton } from '@components/feedback';
 import { saveMacros, getMacros } from '@utils/db';
+import { Menu } from '@components/layout';
+import MenuCard from '@components/ui/MenuCard';
 
 
 
@@ -42,84 +44,78 @@ export default function GoalScreen() {
 
 
     return (
-        <SafeAreaView style={[styles.container]} edges={['top', 'left', 'right']}>
-            <GestureHandlerRootView style={{ flex: 1, height: '100%' }} onLayout={(e) => {
+        <GestureHandlerRootView
+            style={{ flex: 1, backgroundColor: colors.background }}
+            onLayout={(e) => {
                 setContainerHeight(e.nativeEvent.layout.height);
             }}>
-
+            <MenuCard title="Set Your Daily Goals">
                 <View style={styles.section}>
-                    <View style={styles.card}>
-                        <View style={styles.cardHeaderRow}>
-                            <Text style={styles.labelText}>Calories</Text>
-                            <Text style={styles.valueText}>{calories} Cal</Text>
-                        </View>
-                        <View style={styles.cardContent}>
-                            <Slider
-                                showTicks
-                                tickLabels={[1000, 2000, 3000, 4000]}
-                                min={1000}
-                                max={4000}
-                                step={100}
-                                value={calories}
-                                onUpdate={cals => setCalories(cals)}
-                                onChange={cals => setCalories(cals)}
-                            />
-                        </View>
+                    <View style={styles.cardHeaderRow}>
+                        <Text style={styles.labelText}>Calories</Text>
+                        <Text style={styles.valueText}>{calories} Cal</Text>
                     </View>
-                    <View style={styles.card}>
-                        <View style={styles.cardHeaderRow}>
-                            <Text style={styles.labelText}>Protein</Text>
-                            <Text style={styles.valueText}>{protein} g</Text>
-                        </View>
-                        <View style={styles.cardContent}>
-                            <Slider
-                                showTicks
-                                tickLabels={[40, 100, 160, 220, 280]}
-                                min={40}
-                                max={280}
-                                step={5}
-                                value={protein}
-                                onUpdate={v => setProtein(v)}
-                                onChange={v => setProtein(v)}
-                            />
-                        </View>
+                    <View style={styles.cardContent}>
+                        <Slider
+                            showTicks
+                            tickLabels={[1000, 2000, 3000, 4000]}
+                            min={1000}
+                            max={4000}
+                            step={100}
+                            value={calories}
+                            onUpdate={cals => setCalories(cals)}
+                            onChange={cals => setCalories(cals)}
+                        />
                     </View>
-                    <View style={styles.card}>
-                        <View style={styles.cardHeaderRow}>
-                            <Text style={styles.labelText}>Carbohydrates</Text>
-                            <Text style={styles.valueText}>{carbs} g</Text>
-                        </View>
-                        <View style={styles.cardContent}>
-                            <Slider
-                                showTicks
-                                tickLabels={[20, 150, 280, 410, 540]}
-                                min={20}
-                                max={540}
-                                step={10}
-                                value={carbs}
-                                onUpdate={v => setCarbs(v)}
-                                onChange={v => setCarbs(v)}
-                            />
-                        </View>
+                    <View style={styles.cardHeaderRow}>
+                        <Text style={styles.labelText}>Protein</Text>
+                        <Text style={styles.valueText}>{protein} g</Text>
                     </View>
-                    <View style={styles.card}>
-                        <View style={styles.cardHeaderRow}>
-                            <Text style={styles.labelText}>Fats</Text>
-                            <Text style={styles.valueText}>{fat} g</Text>
-                        </View>
-                        <View style={styles.cardContent}>
-                            <Slider
-                                showTicks
-                                tickLabels={[30, 70, 110, 150, 190]}
-                                min={30}
-                                max={190}
-                                step={5}
-                                value={fat}
-                                onUpdate={v => setFat(v)}
-                                onChange={v => setFat(v)}
-                            />
-                        </View>
+                    <View style={styles.cardContent}>
+                        <Slider
+                            showTicks
+                            tickLabels={[40, 100, 160, 220, 280]}
+                            min={40}
+                            max={280}
+                            step={5}
+                            value={protein}
+                            onUpdate={v => setProtein(v)}
+                            onChange={v => setProtein(v)}
+                        />
                     </View>
+                    <View style={styles.cardHeaderRow}>
+                        <Text style={styles.labelText}>Carbohydrates</Text>
+                        <Text style={styles.valueText}>{carbs} g</Text>
+                    </View>
+                    <View style={styles.cardContent}>
+                        <Slider
+                            showTicks
+                            tickLabels={[20, 150, 280, 410, 540]}
+                            min={20}
+                            max={540}
+                            step={10}
+                            value={carbs}
+                            onUpdate={v => setCarbs(v)}
+                            onChange={v => setCarbs(v)}
+                        />
+                    </View>
+                    <View style={styles.cardHeaderRow}>
+                        <Text style={styles.labelText}>Fats</Text>
+                        <Text style={styles.valueText}>{fat} g</Text>
+                    </View>
+                    <View style={styles.cardContent}>
+                        <Slider
+                            showTicks
+                            tickLabels={[30, 70, 110, 150, 190]}
+                            min={30}
+                            max={190}
+                            step={5}
+                            value={fat}
+                            onUpdate={v => setFat(v)}
+                            onChange={v => setFat(v)}
+                        />
+                    </View>
+
                 </View>
                 <View style={{ marginVertical: 10, flexDirection: 'row', justifyContent: 'flex-end' }}>
                     <RippleButton
@@ -129,11 +125,10 @@ export default function GoalScreen() {
                         }}
                         style={styles.saveButton}
                         text='Save'></RippleButton>
+
                 </View>
-
-
-            </GestureHandlerRootView>
-        </SafeAreaView >
+            </MenuCard>
+        </GestureHandlerRootView>
     );
 }
 
@@ -143,49 +138,17 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 8,
-    },
-    ticksRow: {
-        position: "relative",
-        top: 0,
-        left: 0,
-        right: 0,
-        marginTop: 10,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-    },
-    container: {
-        flex: 1,
-        paddingTop: 25,
-        paddingHorizontal: 20,
-        backgroundColor: colors.background,
+
     },
     section: {
         gap: 12,
+        alignSelf: 'stretch',
     },
     sectionTitle: {
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 12,
         color: colors.textSecondary,
-    },
-    macroRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 20,
-    },
-    sliderRow: {
-        marginTop: 10,
-        marginBottom: 20,
-        paddingHorizontal: 30,
-        flexDirection: 'row',
-    },
-    card: {
-        backgroundColor: '#fff',
-        borderRadius: 10,
-        paddingVertical: 20,
-        paddingHorizontal: 24,
-        ...cardShadow,
     },
     cardHeaderRow: {
         flexDirection: 'row',
@@ -197,6 +160,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingBottom: 2,
         marginVertical: 24,
+
     },
     labelText: {
         fontSize: 18,

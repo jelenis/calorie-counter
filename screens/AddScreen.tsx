@@ -3,6 +3,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import React, { use, useDeferredValue, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import AddEntryMenu from '@components/entries/AddEntryMenu';
 import type { ModalStackParamList } from '@utils/types';
 
@@ -19,6 +20,7 @@ import type { EmptyFoodEntry } from '@utils/db';
 import * as db from '@utils/db';
 import { fetchSearchResults } from '@utils/api';
 import { useFocusEffect } from '@react-navigation/native';
+import { is } from 'zod/v4/locales';
 
 const MINIMUM_SEARCH_LEN = 3;
 
@@ -102,11 +104,18 @@ export default function AddScreen({ route, navigation }: Props) {
         if (route.params?.dateStr) {
             try {
                 await insertEntry(route.params.dateStr, item as FoodEntry);
-            } catch (e) {
+            } catch (e: any) {
                 console.error(e.message);
             }
         }
     };
+
+    // early return for loading state
+    // TODO replacew with a spinner or skeleton
+    let showLoadingState = false;
+    if (results.length === 0 && isFetching) {
+        showLoadingState = true;
+    }
 
     return (
         <>
@@ -129,6 +138,16 @@ export default function AddScreen({ route, navigation }: Props) {
                     keyExtractor={(item) => `${item.food_id}-${item.id ?? ''}`}
                 />
             </View>
+
+            {/* TODO replace with a spinner or skeleton */}
+            {showLoadingState && (
+                <Animated.View
+                    entering={FadeIn}
+                    exiting={FadeOut}
+                    style={{ position: 'absolute', top: '50%', left: 0, right: 0, alignItems: 'center' }}>
+                    <Text style={{ color: colors.textSubtle }}>Loading...</Text>
+                </Animated.View>
+            )}
             <Menu visible={modalVisible} setVisible={setModalVisible}>
                 <AddEntryMenu
                     selectedItem={selectedItem}

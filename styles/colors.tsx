@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { pl } from "zod/v4/locales";
 
 
 const lighterBlue = '#2196F3';
@@ -14,6 +15,7 @@ const colors = {
     background: '#F3F5F5',
     error: '#e66260',
     success: '#79d173ff',
+    placeholder: '#bcbcbcff',
 };
 
 export default colors;
