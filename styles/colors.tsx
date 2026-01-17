@@ -14,7 +14,9 @@ const colors = {
     ripple: '#cececeff',
     background: '#F3F5F5',
     error: '#e66260',
+    orange: 'tomato',
     success: '#79d173ff',
+    warn: '#eec85fff',
     placeholder: '#bcbcbcff',
 };
 

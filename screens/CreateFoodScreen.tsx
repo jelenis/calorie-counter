@@ -8,6 +8,8 @@ import * as db from '@utils/db';
 import { RootTabParamList, UNIT_TO_GRAMS } from '@utils/types';
 import * as z from 'zod';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { SaveToast } from '@components/ui/successToast';
+import Toast from 'react-native-toast-message';
 const reg = /^(\d+(\.\d+)?)\s*(g|oz|lb)?$/i;
 
 
@@ -182,10 +184,16 @@ export default function CreateFoodScreen({ navigation }: Props) {
             </View>
             <View style={styles.buttonContainer}>
                 <RippleButton text="Save" style={styles.saveButton} onPress={async () => {
-                    const ok = await saveFood();
-                    if (ok) navigation.navigate({ name: 'Home', params: undefined });
+                    const result = await saveFood();
+                    if (result != undefined) {
+                        Toast.show({
+                            type: 'success',
+                        });
+                        navigation.navigate({ name: 'Home', params: undefined });
+                    }
                 }} />
             </View>
+            <SaveToast text={`Added ${mealName} to your foods`} />
         </MenuCard>
     );
 }

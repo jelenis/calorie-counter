@@ -2,10 +2,10 @@ import { StyleSheet, Text, Platform } from 'react-native';
 import colors from '@styles/colors';
 import { AnimatedNumber } from '@components/animations/AnimatedCounters';
 
-export default function TotalCalories({ calories = 0 }) {
-    function formatNumber(num: number) {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
+function formatNumber(num: number) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+export function TotalCalories({ calories = 0 }) {
     return (
         <AnimatedNumber
             calories={calories}
@@ -15,6 +15,8 @@ export default function TotalCalories({ calories = 0 }) {
         />
     );
 }
+
+
 
 const styles = StyleSheet.create({
     calorieText: {

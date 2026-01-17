@@ -26,6 +26,7 @@ export type FoodEntry = Food & {
 }
 
 export type EmptyFoodEntry = Food & Partial<FoodEntry>;
+export type Macro = { calories: number; protein: number; carbs: number; fat: number } | null
 
 export async function getDB() {
     if (db) return db;
@@ -229,7 +230,7 @@ export async function getEntriesByDate(date: string | Date): Promise<FoodEntry[]
 export async function saveMacros(calories: number, protein: number, carbs: number, fat: number) {
     const db = await getDB();
     const today = getDayKey(new Date());
-    await db.runAsync(
+    const result = await db.runAsync(
         `INSERT INTO goals (date, calories, protein, carbs, fat)
          VALUES (?, ?, ?, ?, ?)
          ON CONFLICT(date) DO UPDATE SET
@@ -239,6 +240,7 @@ export async function saveMacros(calories: number, protein: number, carbs: numbe
            fat      = excluded.fat;`,
         [today, calories, protein, carbs, fat]
     );
+    return result.lastInsertRowId;
 }
 
 export async function getMacros(): Promise<{

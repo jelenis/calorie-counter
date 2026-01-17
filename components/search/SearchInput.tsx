@@ -14,6 +14,8 @@ export type SearchInputProps = {
     data: any[];
     keyExtractor?: (item: any, index: number) => string;
     placeholder?: string;
+    isLoading?: boolean;
+    loadingItem?: React.ReactElement | null;
 } & TextInput['props'];
 
 const DEBOUNCE_TIME = 450;
@@ -24,7 +26,9 @@ export default function SearchInput(
         renderItem,
         onDebounceChange, onChangeText, value,
         onBackPress,
+        loadingItem = null,
         placeholder = 'Search...',
+        isLoading = false,
         ...rest }: SearchInputProps) {
 
     const debouncedValue = useDebounce(value, DEBOUNCE_TIME);
@@ -65,14 +69,15 @@ export default function SearchInput(
                     onSubmitEditing={handleSubmit}
                     {...rest} />
             </View>
-            <FlatList
+            {isLoading ? loadingItem : <FlatList
+
                 showsVerticalScrollIndicator={true}
                 alwaysBounceVertical={false}
                 style={styles.resultsList}
                 data={data}
                 renderItem={AnimatedRow}
                 keyExtractor={keyExtractor}
-            />
+            />}
         </>
     );
 }

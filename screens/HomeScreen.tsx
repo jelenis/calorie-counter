@@ -4,18 +4,22 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useCallback, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { SectionList } from 'react-native';
-import Animated, { FadeIn, FadeInUp, FadeOut, FadeOutDown, interpolate, Layout, LinearTransition, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInUp, FadeOut, FadeOutDown, } from 'react-native-reanimated';
 
 import colors from '@styles/colors';
 import AddButton from '@components/ui/AddButton';
-import ProgressBar from '@components/ui/ProgressBar';
-import TotalCalories from '@components/animations/TotalCalories';
+
 import AddEntryMenu from '@components/entries/AddEntryMenu';
 import EntryCard from '@components/entries/EntryCard';
 import Header from '@components/layout/Header';
 import * as db from '@utils/db';
 import type { FoodEntry } from '../utils/db';
 import Menu from '@components/layout/Menu';
+import { type Macro } from '@utils/db';
+import MacroPanel from '@components/ui/MacroPanel'
+
+import EvilIcons from '@expo/vector-icons/EvilIcons';
+import { cardShadow, inputCard } from '@styles/card';
 
 
 type SectionProp = {
@@ -66,8 +70,10 @@ function groupByMeal(rows: FoodEntry[]): { time: string; data: FoodEntry[] }[] {
         { time: 'Snacks', data: rows.filter(e => e.time === 'snack'), },
     ];
 }
+function sumNutrientTotals(entries: FoodEntry[], nutrient: keyof FoodEntry) {
+    return entries.reduce((total: number, entry: FoodEntry) => total + (Number(entry[nutrient]) * entry.quantity), 0);
+}
 
-type Macro = { calories: number; protein: number; carbs: number; fat: number }
 export default function HomeScreen({ navigation, params }: { navigation: any; params?: { foodEntry?: FoodEntry } }) {
     const [entries, setEntries] = useState<any[]>([]);
     const [currentDate, setCurrentDate] = useState(() => new Date());
@@ -86,7 +92,7 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
 
     const fetchCaloriesForToday = useCallback(async () => {
         try {
-            const entries = await db.getEntriesByDate(currentDate);
+            const entries = await db.getEntriesByDate(currentDate) as FoodEntry[];
             setEntries(entries);
         } catch (e) {
             console.error('Error fetching entries:', e);
@@ -124,7 +130,11 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
     }
 
 
-    const calories = entries.reduce((total, entry) => total + entry.calories * entry.quantity, 0);
+    const calories = sumNutrientTotals(entries, 'calories');
+    const protein = sumNutrientTotals(entries, 'protein');
+    const carbs = sumNutrientTotals(entries, 'carbs');
+    const fat = sumNutrientTotals(entries, 'fat');
+
     const groupedEntries = groupByMeal(entries).filter(section => section.data.length > 0);
 
     function addDays(date: Date, days: number) {
@@ -146,15 +156,19 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
                 forwardDisabled={currentDate < new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())}
                 date={currentDate} />
 
-            {/* total calories */}
+
+
             {hasEntries ? (
                 <>
-                    <Animated.View exiting={FadeOut} entering={FadeIn} style={{ marginBottom: '3%' }}>
-                        <TotalCalories calories={Math.min(Math.round(calories), 99999)} />
-                    </Animated.View>
+                    <MacroPanel
+                        macros={macros}
+                        calories={calories}
+                        protein={protein}
+                        fat={fat}
+                        carbs={carbs} />
+
                     {/*  main container */}
                     <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.innerContainer}>
-                        <ProgressBar progress={(calories / (macros ? macros.calories : 1)) * 100} />
                         <EntryList
                             sections={groupedEntries}
                             onPress={(id: number) => {
@@ -192,9 +206,7 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
     )
 }
 
-import EvilIcons from '@expo/vector-icons/EvilIcons';
-import { cardShadow, inputCard } from '@styles/card';
-import { scheduleOnRN } from 'react-native-worklets';
+
 function FakeSearchBar({ navigation, currentDate }: { navigation: any, currentDate: Date }) {
 
     return (
@@ -215,7 +227,7 @@ function FakeSearchBar({ navigation, currentDate }: { navigation: any, currentDa
                 fontSize: 20,
                 fontWeight: '600'
             }}>
-                Add your first meal to start tracking.
+                Add a meal to start tracking.
             </Text>
             <Pressable style={[{
                 height: 40,

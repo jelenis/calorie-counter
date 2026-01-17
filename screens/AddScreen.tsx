@@ -135,31 +135,38 @@ export default function AddScreen({ route, navigation }: Props) {
                             isFetching={isFetching}
                         />
                     )}
+                    isLoading={showLoadingState}
+                    loadingItem={
+                        <Animated.View
+                            entering={FadeIn}
+                            exiting={FadeOut}
+                            style={{
+                                position: 'relative',
+                                top: -200,
+                                left: 0,
+                                right: 0,
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                            {/* <Text style={{ color: colors.textSubtle }}>Loading...</Text> */}
+                            <LottieView
+                                autoPlay
+                                ref={animation}
+                                style={{
+
+                                    width: 400,
+                                    height: 400,
+                                }}
+                                source={require('@assets/loading.json')}
+                            />
+
+                        </Animated.View>
+                    }
+
                     placeholder='Search for a food..'
                     keyExtractor={(item) => `${item.food_id}-${item.id ?? ''}`}
                 />
             </View>
-
-            {/* TODO replace with a spinner or skeleton */}
-            {showLoadingState && (
-                <Animated.View
-                    entering={FadeIn}
-                    exiting={FadeOut}
-                    style={{ position: 'relative', top: -200, left: 0, right: 0, alignItems: 'center', justifyContent: 'center' }}>
-                    {/* <Text style={{ color: colors.textSubtle }}>Loading...</Text> */}
-                    <LottieView
-                        autoPlay
-                        ref={animation}
-                        style={{
-
-                            width: 400,
-                            height: 400,
-                        }}
-                        source={require('@assets/loading.json')}
-                    />
-
-                </Animated.View>
-            )}
             <Menu visible={modalVisible} setVisible={setModalVisible}>
                 <AddEntryMenu
                     selectedItem={selectedItem}

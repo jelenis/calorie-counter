@@ -1,16 +1,14 @@
 import colors from '@styles/colors';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { cardShadow } from '@styles/card';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Slider from '@components/ui/Slider';
 import { RippleButton } from '@components/feedback';
 import { saveMacros, getMacros } from '@utils/db';
-import { Menu } from '@components/layout';
 import MenuCard from '@components/ui/MenuCard';
-
+import Toast from 'react-native-toast-message';
+import { SaveToast } from '@components/ui/successToast';
 
 
 
@@ -49,6 +47,7 @@ export default function GoalScreen() {
             onLayout={(e) => {
                 setContainerHeight(e.nativeEvent.layout.height);
             }}>
+
             <MenuCard title="Set Your Daily Goals">
                 <View style={styles.section}>
                     <View style={styles.cardHeaderRow}>
@@ -120,14 +119,15 @@ export default function GoalScreen() {
                 <View style={{ alignSelf: 'stretch', marginVertical: 10, flexDirection: 'row', justifyContent: 'flex-end' }}>
                     <RippleButton
                         onPress={async () => {
-                            await saveMacros(calories, protein, carbs, fat);
+                            const result = await saveMacros(calories, protein, carbs, fat);
+
                             loadMacrosForToday();
                         }}
                         style={styles.saveButton}
                         text='Save'></RippleButton>
-
                 </View>
             </MenuCard>
+
         </GestureHandlerRootView>
     );
 }
