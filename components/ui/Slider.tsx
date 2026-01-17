@@ -21,12 +21,19 @@ type SliderProps = {
     onUpdate?: (value: number) => void;
 };
 
-function getMinorTicks(ticks: number[]) {
+function getMinorTicks(ticks: number[], step: number) {
     const minor = [];
     for (let i = 1; i < ticks.length; i++) {
         const prev = ticks[i - 1];
         const curr = ticks[i];
-        minor.push(Math.floor((prev + curr) / 2));
+
+        const mid = (prev + curr) / 2;
+        const leftover = mid % step
+        // push the closest step to mid
+        // e.g. if the step = 10 and theres a tick at 20 and 150 
+        // the midpoint is 85,  we exceed the previous step by 
+        // mid%step = 5 , so we push 80
+        minor.push(Math.floor(mid) - leftover);
     }
     return minor;
 }
@@ -47,7 +54,7 @@ export default function Slider({
     const isPanning = useSharedValue(false);
     const KnobSize = 24;
 
-    const minorTicks = useMemo(() => getMinorTicks(tickLabels), [tickLabels]);
+    const minorTicks = useMemo(() => getMinorTicks(tickLabels, step), [tickLabels, step]);
     const ticks = Array.from({ length: Math.round((max - min) / step) + 1 }, (_, i) => i);
 
     const pan = Gesture.Pan()
