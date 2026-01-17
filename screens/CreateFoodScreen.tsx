@@ -11,7 +11,8 @@ import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { SaveToast } from '@components/ui/successToast';
 import Toast from 'react-native-toast-message';
 const reg = /^(\d+(\.\d+)?)\s*(g|oz|lb)?$/i;
-
+const MAX_INPUT_LEN_NUM = 6
+const MAX_INPUT_LEN_STR = 35
 
 const servingSizeSchema = z.string().regex(
     reg,
@@ -81,13 +82,14 @@ export default function CreateFoodScreen({ navigation }: Props) {
             category: null, // User foods have no category
         };
         const res = await db.insertEntry(new Date(), normalizedFood as db.FoodEntry);
-        return res;
+        return Boolean(res);
     }
     return (
         <MenuCard title="Create a Meal">
             <Text style={[styles.title,]}>Name</Text>
             <View style={{ width: '80%', flexDirection: 'row', alignItems: 'center' }}>
                 <TextInput
+                    maxLength={MAX_INPUT_LEN_STR}
                     value={mealName}
                     onChangeText={setMealName}
                     style={styles.mealName}
@@ -96,6 +98,7 @@ export default function CreateFoodScreen({ navigation }: Props) {
             <Text style={[styles.title, { marginTop: 15 }]}>Brand Name <Text style={{ opacity: 0.4 }}>(Optional)</Text></Text>
             <View style={{ width: '80%', flexDirection: 'row', alignItems: 'center' }}>
                 <TextInput
+                    maxLength={MAX_INPUT_LEN_STR}
                     value={brandName}
                     onChangeText={setBrandName}
                     style={styles.brandName}
@@ -104,6 +107,7 @@ export default function CreateFoodScreen({ navigation }: Props) {
             <Text style={[styles.title, { marginTop: 15 }]}>Serving Size</Text>
             <View style={{ width: 100, flexDirection: 'row', alignItems: 'center' }}>
                 <TextInput
+                    maxLength={MAX_INPUT_LEN_NUM}
                     value={servingSize}
                     onChangeText={setServingSize}
                     style={styles.servingSize}
@@ -132,6 +136,7 @@ export default function CreateFoodScreen({ navigation }: Props) {
                         <Text style={[styles.nutrientLabel]}>Calories</Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <TextInput
+                                maxLength={MAX_INPUT_LEN_NUM}
                                 style={styles.nutrientValue}
                                 value={calorieText}
                                 onChangeText={setCalorieText}
@@ -145,6 +150,7 @@ export default function CreateFoodScreen({ navigation }: Props) {
                         <Text style={styles.nutrientLabel}>Protein</Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <TextInput
+                                maxLength={MAX_INPUT_LEN_NUM}
                                 style={styles.nutrientValue}
                                 value={proteinText}
                                 onChangeText={setProteinText}
@@ -158,6 +164,7 @@ export default function CreateFoodScreen({ navigation }: Props) {
                         <Text style={styles.nutrientLabel}>Fat</Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <TextInput
+                                maxLength={MAX_INPUT_LEN_NUM}
                                 style={styles.nutrientValue}
                                 value={fatText}
                                 onChangeText={setFatText}
@@ -171,6 +178,7 @@ export default function CreateFoodScreen({ navigation }: Props) {
                         <Text style={styles.nutrientLabel}>Carbs</Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <TextInput
+                                maxLength={MAX_INPUT_LEN_NUM}
                                 style={styles.nutrientValue}
                                 value={carbsText}
                                 onChangeText={setCarbsText}
@@ -185,11 +193,11 @@ export default function CreateFoodScreen({ navigation }: Props) {
             <View style={styles.buttonContainer}>
                 <RippleButton text="Save" style={styles.saveButton} onPress={async () => {
                     const result = await saveFood();
-                    if (result != undefined) {
+                    if (result) {
                         Toast.show({
                             type: 'success',
                         });
-                        navigation.navigate({ name: 'Home', params: undefined });
+                        // navigation.navigate({ name: 'Home', params: undefined });
                     }
                 }} />
             </View>

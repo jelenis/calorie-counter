@@ -26,6 +26,8 @@ const servingSizeSchema = z.string().refine((val: string) => {
 });
 
 
+const MAX_INPUT_LEN_NUM = 6
+
 
 export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEntry, closeModal }: AddEntryMenuProps) {
     const [servingSizeText, setServingSizeText] = React.useState('');
@@ -128,7 +130,7 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                                 value={caloriesText}
                                 onChangeText={setCaloriesText}
                                 keyboardType="number-pad"
-
+                                maxLength={MAX_INPUT_LEN_NUM}
                                 onBlur={() => {
                                     const parsed = parseFloat(caloriesText);
                                     if (isNaN(parsed) || parsed < 0) {
@@ -169,7 +171,7 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                         <View>
                             <Input
                                 keyboardType='number-pad'
-
+                                maxLength={MAX_INPUT_LEN_NUM}
                                 onSubmitEditing={Keyboard.dismiss}
                                 style={styles.quantityInput}
                                 containerStyle={styles.quantityContainer}
