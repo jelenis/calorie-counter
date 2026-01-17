@@ -117,7 +117,7 @@ export default function GoalScreen() {
                     </View>
 
                 </View>
-                <View style={{ marginVertical: 10, flexDirection: 'row', justifyContent: 'flex-end' }}>
+                <View style={{ alignSelf: 'stretch', marginVertical: 10, flexDirection: 'row', justifyContent: 'flex-end' }}>
                     <RippleButton
                         onPress={async () => {
                             await saveMacros(calories, protein, carbs, fat);
