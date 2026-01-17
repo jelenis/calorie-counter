@@ -208,7 +208,15 @@ function FakeSearchBar({ navigation, currentDate }: { navigation: any, currentDa
             entering={FadeInUp}
             exiting={FadeOutDown}
         >
-            <Text style={{ textAlign: 'center', color: colors.textSubtle, marginBottom: 32, fontSize: 18 }}>No entries made today.</Text>
+            <Text style={{
+                textAlign: 'center',
+                color: colors.textPrimary,
+                marginBottom: 32,
+                fontSize: 20,
+                fontWeight: '600'
+            }}>
+                Add your first meal to start tracking.
+            </Text>
             <Pressable style={[{
                 height: 40,
                 justifyContent: 'center',

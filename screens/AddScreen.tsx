@@ -1,6 +1,6 @@
 import type { ListRenderItemInfo } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-
+import LottieView from 'lottie-react-native';
 import React, { use, useDeferredValue, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
@@ -57,7 +57,7 @@ export default function AddScreen({ route, navigation }: Props) {
     const [modalVisible, setModalVisible] = React.useState(false);
     const [selectedItem, setSelectedItem] = React.useState<EmptyFoodEntry | null>(null);
 
-
+    const animation = React.useRef<LottieView>(null);
 
     // Derived input values
     const trimmedValue = debouncedValue.trim().toLowerCase();
@@ -116,6 +116,7 @@ export default function AddScreen({ route, navigation }: Props) {
     if (results.length === 0 && isFetching) {
         showLoadingState = true;
     }
+    // showLoadingState = true; // testtest
 
     return (
         <>
@@ -144,8 +145,19 @@ export default function AddScreen({ route, navigation }: Props) {
                 <Animated.View
                     entering={FadeIn}
                     exiting={FadeOut}
-                    style={{ position: 'absolute', top: '50%', left: 0, right: 0, alignItems: 'center' }}>
-                    <Text style={{ color: colors.textSubtle }}>Loading...</Text>
+                    style={{ position: 'relative', top: -200, left: 0, right: 0, alignItems: 'center', justifyContent: 'center' }}>
+                    {/* <Text style={{ color: colors.textSubtle }}>Loading...</Text> */}
+                    <LottieView
+                        autoPlay
+                        ref={animation}
+                        style={{
+
+                            width: 400,
+                            height: 400,
+                        }}
+                        source={require('@assets/loading.json')}
+                    />
+
                 </Animated.View>
             )}
             <Menu visible={modalVisible} setVisible={setModalVisible}>
