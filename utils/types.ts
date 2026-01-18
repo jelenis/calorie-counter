@@ -18,4 +18,7 @@ export type RootStackParamList = {
 export type ModalStackParamList = {
     HomeScreen: { foodEntry?: FoodEntry } | undefined;
     AddScreen: { dateStr: Date } | undefined;
+    AboutScreen: undefined;
+    OpenSourceData: undefined;
+    ThirdPartyLicenses: undefined;
 };

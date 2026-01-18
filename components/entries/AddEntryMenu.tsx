@@ -1,6 +1,6 @@
 import React, { use, useEffect } from 'react';
 import { z } from 'zod';
-import { View, Text, StyleSheet, Alert, Keyboard, Pressable, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Alert, Keyboard, Pressable, TextInput, Linking } from 'react-native';
 
 import { RippleButton } from '@components/ui';
 import type { EmptyFoodEntry, FoodEntry } from '@utils/db';
@@ -112,6 +112,8 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
         { label: 'Pounds (lb)', value: 'lb' },
     ]
 
+    const sourceURL = 'https://world.openfoodfacts.org'
+    const sourceText = '(c) Open Food Facts contributors'
 
     return (
         <Pressable onPress={Keyboard.dismiss} >
@@ -126,6 +128,7 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                 <View style={styles.menuContent}>
                     {brand && <Text style={styles.brand}>{brand}</Text>}
                     <Text style={[styles.selectedItemName, styles.borderBottom]}>{selectedItem?.name}</Text>
+
                     <View style={styles.nutrientsContainer}>
                         <View style={[styles.nutrientRow]}>
                             <Text style={[styles.nutrientLabel, styles.calories]}>Calories</Text>
@@ -156,6 +159,10 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                             <Text style={styles.nutrientValue}>{totCarbs.toFixed(0)} g</Text>
                         </View>
                     </View>
+
+                    {selectedItem.server_id && <Pressable style={styles.source} onPress={() => Linking.openURL(sourceURL)}>
+                        <Text style={styles.sourceText}>{sourceText}</Text>
+                    </Pressable>}
                 </View>
 
                 <View style={styles.mealContainer}>
@@ -215,6 +222,7 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                     </View>
                 </View >
 
+
                 <View style={[styles.menuFooter, styles.borderTop, { justifyContent: deleteFoodEntry ? 'space-between' : 'flex-end' }]}>
                     {deleteFoodEntry && <RippleButton
                         style={styles.cancelButton}
@@ -246,6 +254,7 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                         }
                     }} />
                 </View>
+
             </View >
         </Pressable>
     );
@@ -376,5 +385,13 @@ const styles = StyleSheet.create({
     },
     oddRow: {
         backgroundColor: '#f8f8f8',
+    },
+    source: {
+        marginTop: 20,
+        color: colors.link,
+    },
+    sourceText: {
+        color: colors.link,
+        fontSize: 14
     }
 });

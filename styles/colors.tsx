@@ -18,6 +18,7 @@ const colors = {
     success: '#79d173ff',
     warn: '#eec85fff',
     placeholder: '#bcbcbcff',
+    link: lighterBlue
 };
 
 export default colors;

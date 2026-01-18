@@ -92,10 +92,10 @@ async function initialize(db: SQLite.SQLiteDatabase) {
 
 
     try {
-        await db.execAsync(`
-        DROP TABLE IF EXISTS entries;
-        DROP TABLE IF EXISTS foods;
-        DROP TABLE IF EXISTS days; `)
+        // await db.execAsync(`
+        // DROP TABLE IF EXISTS entries;
+        // DROP TABLE IF EXISTS foods;
+        // DROP TABLE IF EXISTS days; `)
         await db.execAsync(sql);
     } catch (e) {
         console.error('Error during DB initialization:', e);
@@ -172,14 +172,19 @@ export async function insertEntry(
 
 
     // look up food id 
-    let row = await db.getFirstAsync<{ id: number }>(
-        `SELECT id FROM foods WHERE server_id = ? OR id = ?`,
-        [entry.server_id, entry.food_id]
-    );
-    if (row?.id == undefined) {
-        throw Error('Missing food after it was inserted')
+    let foodId: number;
+    if (result.changes === 1 && result.lastInsertRowId != null) {
+        // if it was inserted grab it from results
+        foodId = result.lastInsertRowId;
+    } else {
+        // there was a conflict (it already exists)
+        const row = await db.getFirstAsync<{ id: number }>(
+            `SELECT id FROM foods WHERE server_id = ? OR id = ?`,
+            [entry.server_id, entry.food_id]
+        );
+        if (!row) throw new Error('Missing food');
+        foodId = row.id;
     }
-    const foodId = row?.id
     // upsert, will insert if id is null
     result = await db.runAsync(
         `INSERT INTO entries (
@@ -199,7 +204,7 @@ export async function insertEntry(
         ]
     );
 
-    row = await db.getFirstAsync<{ id: number }>(
+    const row = await db.getFirstAsync<{ id: number }>(
         `SELECT *
             FROM entries
             ORDER BY id DESC
@@ -225,7 +230,6 @@ export async function getRecents(): Promise<Food[]> {
     foods = foods.map(f => ({ ...f, id: undefined }));
 
     console.log("returning recents...")
-    console.log(JSON.stringify(foods, null, 2))
     return foods;
 }
 

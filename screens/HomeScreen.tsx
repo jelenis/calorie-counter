@@ -1,5 +1,5 @@
 
-import { View, Text, StyleSheet, Button, TextInput, FlatList, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useCallback, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
@@ -152,6 +152,7 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
                 onForwardPress={() => {
                     setCurrentDate(addDays(currentDate, 1));
                 }}
+                onAboutPress={() => navigation.navigate('AboutScreen')}
                 // Disable forward button if currentDate is today or later
                 forwardDisabled={currentDate < new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())}
                 date={currentDate} />

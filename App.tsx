@@ -44,6 +44,9 @@ import HomeScreen from '@screens/HomeScreen'
 import AddScreen from '@screens/AddScreen';
 import GoalScreen from '@screens/GoalScreen';
 import CreateFoodScreen from '@screens/CreateFoodScreen';
+import AboutScreen from '@screens/AboutScreen';
+import OpenSourceDataScreen from '@screens/OpenSourceDataScreen';
+import ThirdPartyLicensesScreen from '@screens/ThirdPartyLicensesScreen';
 import colors from '@styles/colors';
 import { ToastHost } from '@components/ui/successToast';
 
@@ -120,6 +123,34 @@ function HomeStack() {
           animationDuration: 300,
         }}
         component={AddScreen}
+      />
+
+      <ModalStack.Screen
+        name="AboutScreen"
+        options={{
+          presentation: 'card',
+          gestureEnabled: true,
+          animationDuration: 250,
+        }}
+        component={AboutScreen}
+      />
+      <ModalStack.Screen
+        name="OpenSourceData"
+        options={{
+          presentation: 'card',
+          gestureEnabled: true,
+          animationDuration: 250,
+        }}
+        component={OpenSourceDataScreen}
+      />
+      <ModalStack.Screen
+        name="ThirdPartyLicenses"
+        options={{
+          presentation: 'card',
+          gestureEnabled: true,
+          animationDuration: 250,
+        }}
+        component={ThirdPartyLicensesScreen}
       />
     </ModalStack.Navigator>
   )
