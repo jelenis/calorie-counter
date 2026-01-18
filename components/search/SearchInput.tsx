@@ -16,6 +16,7 @@ export type SearchInputProps = {
     placeholder?: string;
     isLoading?: boolean;
     loadingItem?: React.ReactElement | null;
+    inputRef?: React.Ref<TextInput>;
 } & TextInput['props'];
 
 const DEBOUNCE_TIME = 450;
@@ -29,6 +30,7 @@ export default function SearchInput(
         loadingItem = null,
         placeholder = 'Search...',
         isLoading = false,
+        inputRef,
         ...rest }: SearchInputProps) {
 
     const debouncedValue = useDebounce(value, DEBOUNCE_TIME);
@@ -63,21 +65,25 @@ export default function SearchInput(
             <View style={styles.searchBar}>
                 <Entypo onPress={onBackPress} name="chevron-small-left" size={24} color="black" />
                 <Input
+                    ref={inputRef}
                     placeholder={placeholder}
                     onChangeText={onChangeTextInternal}
                     value={value}
                     onSubmitEditing={handleSubmit}
                     {...rest} />
             </View>
-            {isLoading ? loadingItem : <FlatList
 
-                showsVerticalScrollIndicator={true}
-                alwaysBounceVertical={false}
-                style={styles.resultsList}
-                data={data}
-                renderItem={AnimatedRow}
-                keyExtractor={keyExtractor}
-            />}
+            {/* show loading animation if list is empty 
+            (This should only happend when theres no recents) */}
+            {isLoading ? loadingItem : (
+                <FlatList
+                    showsVerticalScrollIndicator={true}
+                    alwaysBounceVertical={false}
+                    style={styles.resultsList}
+                    data={data}
+                    renderItem={AnimatedRow}
+                    keyExtractor={keyExtractor}
+                />)}
         </>
     );
 }

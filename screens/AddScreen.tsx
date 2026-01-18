@@ -1,8 +1,8 @@
 import type { ListRenderItemInfo } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import LottieView from 'lottie-react-native';
-import React, { use, useDeferredValue, useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import React, { use, useCallback, useDeferredValue, useEffect, useMemo, useRef } from 'react';
+import { View, Text, StyleSheet, Platform, TextInput } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import AddEntryMenu from '@components/entries/AddEntryMenu';
 import type { ModalStackParamList } from '@utils/types';
@@ -20,7 +20,6 @@ import type { EmptyFoodEntry } from '@utils/db';
 import * as db from '@utils/db';
 import { fetchSearchResults } from '@utils/api';
 import { useFocusEffect } from '@react-navigation/native';
-import { is } from 'zod/v4/locales';
 
 const MINIMUM_SEARCH_LEN = 3;
 
@@ -56,13 +55,25 @@ export default function AddScreen({ route, navigation }: Props) {
     const [debouncedValue, setDebouncedValue] = React.useState('');
     const [modalVisible, setModalVisible] = React.useState(false);
     const [selectedItem, setSelectedItem] = React.useState<EmptyFoodEntry | null>(null);
-
+    const searchInputRef = useRef<TextInput>(null);
     const animation = React.useRef<LottieView>(null);
 
     // Derived input values
     const trimmedValue = debouncedValue.trim().toLowerCase();
     const recents = useRecents(trimmedValue);
 
+    useFocusEffect(
+        useCallback(() => {
+            const rafId = requestAnimationFrame(() => {
+                searchInputRef.current?.focus();
+            });
+
+            return () => {
+                cancelAnimationFrame(rafId);
+                searchInputRef.current?.blur();
+            };
+        }, []),
+    );
 
     // Search query
     const { isError, isFetching, data, error } = useQuery({
@@ -110,8 +121,6 @@ export default function AddScreen({ route, navigation }: Props) {
         }
     };
 
-    // early return for loading state
-    // TODO replacew with a spinner or skeleton
     let showLoadingState = false;
     if (results.length === 0 && isFetching) {
         showLoadingState = true;
@@ -122,6 +131,7 @@ export default function AddScreen({ route, navigation }: Props) {
         <>
             <View style={[styles.container, insets]}>
                 <SearchInput
+                    inputRef={searchInputRef}
                     data={results}
                     value={value}
                     onChangeText={handleChangeText}

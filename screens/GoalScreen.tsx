@@ -120,6 +120,11 @@ export default function GoalScreen() {
                     <RippleButton
                         onPress={async () => {
                             const result = await saveMacros(calories, protein, carbs, fat);
+                            if (result != undefined) {
+                                Toast.show({
+                                    type: 'success'
+                                })
+                            }
 
                             loadMacrosForToday();
                         }}
@@ -127,7 +132,7 @@ export default function GoalScreen() {
                         text='Save'></RippleButton>
                 </View>
             </MenuCard>
-
+            <SaveToast text={`Your goals have been updated!`} />
         </GestureHandlerRootView>
     );
 }

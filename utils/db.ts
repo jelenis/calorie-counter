@@ -44,13 +44,11 @@ async function initialize(db: SQLite.SQLiteDatabase) {
         PRAGMA journal_mode = WAL;
         PRAGMA foreign_keys = ON;
         
-        /*
-        DROP TABLE IF EXISTS entries;
+        
+        /*DROP TABLE IF EXISTS entries;
         DROP TABLE IF EXISTS foods;
-        DROP TABLE IF EXISTS days;
-        */
-
-
+        DROP TABLE IF EXISTS days; */
+        
         CREATE TABLE IF NOT EXISTS days (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             date TEXT NOT NULL UNIQUE  -- YYYY-MM-DD
@@ -59,7 +57,7 @@ async function initialize(db: SQLite.SQLiteDatabase) {
         
         CREATE TABLE IF NOT EXISTS foods (
             id INTEGER PRIMARY KEY,
-            server_id INTEGER,
+            server_id INTEGER UNIQUE,
             upc TEXT,
             name TEXT NOT NULL,
             calories INTEGER NOT NULL,
@@ -77,7 +75,7 @@ async function initialize(db: SQLite.SQLiteDatabase) {
             quantity INTEGER DEFAULT 1,
             day_id INTEGER NOT NULL,
         
-            food_id INTEGER DEFAULT NULL,
+            food_id INTEGER NOT NULL,
         
             time TEXT NOT NULL DEFAULT 'snack',
             CHECK (time IN ('breakfast','lunch','dinner','snack')),
@@ -149,7 +147,8 @@ export async function insertEntry(
             carbs
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
         [
-            entry.id,
+            // if server_id already exists leave it
+            entry.server_id ?? null,
             entry.upc ?? null,
             entry.name,
             entry.calories,
@@ -162,20 +161,41 @@ export async function insertEntry(
             entry.carbs ?? null
         ]
     );
-    // Insert or update entry
+
+
+    let foodId = result.lastInsertRowId;
+    if (!foodId && entry.server_id) {
+        // look up food id if it's already in the table
+        const row = await db.getFirstAsync<{ id: number }>(
+            `SELECT id FROM foods WHERE server_id = ?;`,
+            entry.server_id
+        );
+        if (row?.id == undefined) {
+            throw Error('Missing foodId after it was inserted')
+        }
+        foodId = row?.id
+    }
+
+
+    // upsert, will insert if id is null
     result = await db.runAsync(
-        `INSERT OR REPLACE INTO entries (
-            id, quantity, day_id, food_id, time
-        ) VALUES (?,?,?,?,?);`,
+        `INSERT INTO entries (
+                id, quantity, day_id, food_id, time
+            ) VALUES (?,?,?,?,?)
+            ON CONFLICT(id) DO UPDATE SET
+                quantity = excluded.quantity,
+                day_id   = excluded.day_id,
+                food_id  = excluded.food_id,
+                time     = excluded.time;`,
         [
-            entry.id ?? null,
+            entry.id ?? null, // undefined coalesced to null
             entry.quantity ?? 1,
             dayId,
-            result.lastInsertRowId,
+            foodId,
             entry.time
         ]
     );
-    return result.lastInsertRowId;
+    return entry.id ?? result.lastInsertRowId;
 }
 
 export async function getRecents(): Promise<FoodEntry[]> {
@@ -183,6 +203,7 @@ export async function getRecents(): Promise<FoodEntry[]> {
     const foods = await db.getAllAsync<FoodEntry>(
         `SELECT DISTINCT f.*, e.food_id FROM foods f
          JOIN entries e ON e.food_id = f.id
+         GROUP BY food_id
          ORDER BY e.id DESC
          LIMIT 35;`
     );

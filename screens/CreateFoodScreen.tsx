@@ -80,6 +80,7 @@ export default function CreateFoodScreen({ navigation }: Props) {
             serving_size_g: servingSizeFactor,
             serving_text: servingSize,
             category: null, // User foods have no category
+            time: 'snack'
         };
         const res = await db.insertEntry(new Date(), normalizedFood as db.FoodEntry);
         return Boolean(res);
@@ -192,12 +193,16 @@ export default function CreateFoodScreen({ navigation }: Props) {
             </View>
             <View style={styles.buttonContainer}>
                 <RippleButton text="Save" style={styles.saveButton} onPress={async () => {
-                    const result = await saveFood();
-                    if (result) {
-                        Toast.show({
-                            type: 'success',
-                        });
-                        // navigation.navigate({ name: 'Home', params: undefined });
+                    try {
+
+                        const result = await saveFood();
+                        if (result) {
+                            Toast.show({
+                                type: 'success',
+                            });
+                        }
+                    } catch (e) {
+                        console.error(e)
                     }
                 }} />
             </View>

@@ -1,18 +1,32 @@
-import { View, TextInput, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, TextInput, StyleSheet, type TextInputProps } from 'react-native';
 import { cardShadow, inputCard } from '@styles/card';
 
-export default function Input({ onChangeText = () => { }, style, containerStyle, ...rest }:
-    { onChangeText?: (text: string) => void; containerStyle?: object } & TextInput['props']) {
-    return (
-        <View style={[styles.outerInputContainer, containerStyle]}>
-            <TextInput style={[styles.input, style]}
-                onChangeText={(text) => {
-                    onChangeText(text);
-                }}
-                {...rest} />
-        </View>
-    );
-}
+type InputProps = {
+    onChangeText?: (text: string) => void;
+    containerStyle?: object;
+} & TextInputProps;
+
+const Input = React.forwardRef<TextInput, InputProps>(
+    ({ onChangeText = () => { }, style, containerStyle, ...rest }, ref) => {
+        return (
+            <View style={[styles.outerInputContainer, containerStyle]}>
+                <TextInput
+                    ref={ref}
+                    style={[styles.input, style]}
+                    onChangeText={(text) => {
+                        onChangeText(text);
+                    }}
+                    {...rest}
+                />
+            </View>
+        );
+    },
+);
+
+Input.displayName = 'Input';
+
+export default Input;
 
 const styles = StyleSheet.create({
     outerInputContainer: {

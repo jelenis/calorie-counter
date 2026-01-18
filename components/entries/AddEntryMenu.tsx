@@ -2,7 +2,7 @@ import React, { use, useEffect } from 'react';
 import { z } from 'zod';
 import { View, Text, StyleSheet, Alert, Keyboard, Pressable, TextInput } from 'react-native';
 
-import { RippleButton, ToggleButton } from '@components/ui';
+import { RippleButton } from '@components/ui';
 import type { EmptyFoodEntry, FoodEntry } from '@utils/db';
 import Input from '@components/ui/Input';
 import { Dropdown } from 'react-native-element-dropdown';
@@ -18,11 +18,11 @@ type AddEntryMenuProps = {
 }
 
 type MealTime = 'breakfast' | 'lunch' | 'dinner' | 'snack';
-const servingSizeSchema = z.string().refine((val: string) => {
+const quantitySchema = z.string().refine((val: string) => {
     const num = parseFloat(val);
     return !isNaN(num) && num > 0;
 }, {
-    message: 'Serving size must be a positive number',
+    message: 'Quantity must be a positive number',
 });
 
 
@@ -30,20 +30,20 @@ const MAX_INPUT_LEN_NUM = 6
 
 
 export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEntry, closeModal }: AddEntryMenuProps) {
-    const [servingSizeText, setServingSizeText] = React.useState('');
-    const [servingSize, setServingSize] = React.useState(1);
+    const [quantityText, setQuantityText] = React.useState('');
+    const [quantity, setQuantity] = React.useState(1);
     const [selectedUnit, setSelectedUnit] = React.useState<Unit>('g');
     const [time, setTime] = React.useState<MealTime>('breakfast');
     const defaultServingSize = selectedItem?.serving_size_g || 1;
 
-    // Validate servingSizeText before calculations
-    // zod for validating serving size input
-    const isServingSizeValid = servingSizeSchema.safeParse(servingSizeText).success;
-    const parsedServingSize = isServingSizeValid ? parseFloat(servingSizeText) : 0;
+    // Validate quantityText before calculations
+    // zod for validating numeric quantity input
+    const isQuantityValid = quantitySchema.safeParse(quantityText).success;
+    const parsedQuantity = isQuantityValid ? parseFloat(quantityText) : 0;
 
     function calcNutrient(nutrient: number | undefined) {
-        return isServingSizeValid && nutrient !== undefined
-            ? nutrient * conversionMap[selectedUnit] * parsedServingSize
+        return isQuantityValid && nutrient !== undefined
+            ? nutrient * conversionMap[selectedUnit] * parsedQuantity
             : 0;
     }
     const conversionMap: Record<Unit, number> = {
@@ -67,27 +67,32 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
             return; // serving size is meaningless if no calories in selected item
         }
 
-        // update the serving size based on calories and selected item
+        // determine the correct serving size that would give this many calories 
         const newServingSize = calories / selectedItem.calories;
-        setServingSize(newServingSize);
-        setServingSizeText(newServingSize.toFixed(1));
+        setQuantity(newServingSize);
+
+        setQuantityText(newServingSize.toFixed(1));
 
     }, [calories]);
 
-
-
+    // sync valid quantity text to numeric quantity
+    useEffect(() => {
+        if (isQuantityValid) {
+            setQuantity(parseFloat(quantityText))
+        }
+    }, [quantityText])
 
     const isEditing = Boolean(deleteFoodEntry);
 
     const navigation = useNavigation();
-    // set a default serving size when selectedItem changes, only on new enty
+    // set a default serving size when selectedItem changes, only on new entry
     useEffect(() => {
         if (selectedItem?.serving_text && selectedItem.serving_size_g) {
             if (isEditing && selectedItem.quantity) {
-                setServingSizeText((selectedItem.quantity * conversionMap[selectedUnit]).toFixed(1));
+                setQuantityText((selectedItem.quantity * conversionMap[selectedUnit]).toFixed(1));
             } else {
 
-                setServingSizeText(selectedItem.serving_size_g.toFixed(1));
+                setQuantityText(selectedItem.serving_size_g.toFixed(1));
             }
         }
     }, [selectedItem?.serving_text, selectedItem?.serving_size_g])
@@ -95,8 +100,6 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
     if (!selectedItem) {
         return <View><Text>Whoops! No item selected</Text></View>;
     }
-
-
 
     const totProtein = calcNutrient(selectedItem?.protein);
     const totCarbs = calcNutrient(selectedItem?.carbs);
@@ -159,7 +162,7 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                     <Text style={styles.label}>Select Meal</Text>
                     <ToggleListButton
                         data={["Breakfast", "Lunch", "Dinner", "Snack"]}
-                        defaultValue="Snack"
+                        defaultValue={selectedItem.time || "snack"}
                         onChange={(key, value) => {
                             setTime(key.toLowerCase() as MealTime);
                         }} />
@@ -175,11 +178,11 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                                 onSubmitEditing={Keyboard.dismiss}
                                 style={styles.quantityInput}
                                 containerStyle={styles.quantityContainer}
-                                defaultValue={servingSizeText}
+                                defaultValue={quantityText}
                                 onChangeText={(text) => {
                                     const value = parseFloat(text);
-                                    setServingSizeText(text);
-                                    setServingSize(value);
+                                    setQuantityText(text);
+                                    setQuantity(value);
                                 }}
                             />
                         </View>
@@ -199,9 +202,9 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
 
 
                                     // nomralize to grams and convert to new unit
-                                    const newServingSize = (servingSize * conversionMap[prevUnit]) / conversionMap[newUnit];
-                                    setServingSize(newServingSize);
-                                    setServingSizeText(newServingSize.toFixed(1));
+                                    const newQuantity = (quantity * conversionMap[prevUnit]) / conversionMap[newUnit];
+                                    setQuantity(newQuantity);
+                                    setQuantityText(newQuantity.toFixed(1));
                                     setSelectedUnit(item.value);
                                 }}
                                 renderItem={(item) =>
@@ -213,21 +216,26 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                 </View >
 
                 <View style={[styles.menuFooter, styles.borderTop, { justifyContent: deleteFoodEntry ? 'space-between' : 'flex-end' }]}>
-                    {deleteFoodEntry && <RippleButton style={styles.cancelButton} text="Delete" onPress={() => {
-                        deleteFoodEntry(selectedItem?.id || 0);
-                        closeModal();
-                    }} />}
+                    {deleteFoodEntry && <RippleButton
+                        style={styles.cancelButton}
+                        text="Delete"
+                        onPress={() => {
+                            deleteFoodEntry(selectedItem?.id || 0);
+                            closeModal();
+                        }} />}
                     <RippleButton style={styles.saveButton} text="Save" onPress={async () => {
 
-                        if (servingSizeText.trim() === '' || !isServingSizeValid) {
-                            Alert.alert('Oops!', 'Please enter a valid serving size.');
+                        if (quantityText.trim() === '' || !isQuantityValid) {
+                            Alert.alert('Oops!', 'Please enter a valid quantity.');
                             return;
                         }
 
                         if (selectedItem) {
+                            // serving size is actually the same,
+                            // just use it to determine the quantity
                             await addFoodEntry({
                                 ...selectedItem,
-                                quantity: servingSize * conversionMap[selectedUnit],
+                                quantity: quantity * conversionMap[selectedUnit],
                                 time
                             });
                         }

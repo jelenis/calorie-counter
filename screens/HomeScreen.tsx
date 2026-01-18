@@ -173,6 +173,7 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
                             sections={groupedEntries}
                             onPress={(id: number) => {
                                 const entry = entries.find(e => e.id === id) || null;
+
                                 setSelectedItem(entry);
                                 setModalVisible(true);
                             }}

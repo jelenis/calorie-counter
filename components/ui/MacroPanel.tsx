@@ -17,7 +17,7 @@ type MacroPanelProps = {
 
 export default function MacroPanel({ macros, calories, carbs, protein, fat }: MacroPanelProps) {
     function formatNumber(num: number) {
-        return num < 1 ? num.toFixed(2) : Math.round(num);
+        return num < 1 ? num.toFixed(1) : Math.round(num);
     }
     return (<PanelList
         panels={[
@@ -32,19 +32,19 @@ export default function MacroPanel({ macros, calories, carbs, protein, fat }: Ma
                 <View>
                     <Text style={styles.macroLabel}>Carbs</Text>
                     <ProgressCircle color={colors.warn} progress={macros ? (carbs / macros.carbs) : 0} >
-                        <Text style={styles.macroText}>{formatNumber(carbs)}<Text style={{ position: "relative" }}>g</Text></Text>
+                        <Text style={styles.macroText}>{formatNumber(carbs)}<Text style={{ position: "relative" }}> g</Text></Text>
                     </ProgressCircle>
                 </View>
                 <View>
                     <Text style={styles.macroLabel}>Protein</Text>
                     <ProgressCircle color={colors.textPrimary} progress={macros ? (protein / macros.protein) : 0}>
-                        <Text style={styles.macroText}>{formatNumber(protein)}<Text style={{ position: "relative" }}>g</Text></Text>
+                        <Text style={styles.macroText}>{formatNumber(protein)}<Text style={{ position: "relative" }}> g</Text></Text>
                     </ProgressCircle>
                 </View>
                 <View>
                     <Text style={styles.macroLabel}>Fat</Text>
                     <ProgressCircle color={colors.orange} progress={macros ? (fat / macros.fat) : 0} >
-                        <Text style={styles.macroText}>{formatNumber(fat)}<Text style={{ position: "relative" }}>g</Text></Text>
+                        <Text style={styles.macroText}>{formatNumber(fat)}<Text style={{ position: "relative" }}> g</Text></Text>
                     </ProgressCircle>
                 </View>
             </View>

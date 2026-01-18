@@ -38,7 +38,9 @@ type ToggleListButtonProps = {
 export function ToggleListButton({ data, defaultValue, onChange }: ToggleListButtonProps) {
     const scale = useSharedValue(1);
     const [toggledButtons, setToggledButtons] = React.useState(data.map((key, index) => {
-        return key === defaultValue;
+        // find the matching value and make it true
+        console.log(key === defaultValue, key)
+        return key.toLowerCase().trim() === defaultValue.toLowerCase().trim();
     }));
 
 
