@@ -12,7 +12,7 @@ export type SearchInputProps = {
     onBackPress: () => void;
     renderItem: (info: ListRenderItemInfo<any>) => React.ReactElement | null;
     data: any[];
-    keyExtractor?: (item: any, index: number) => string;
+    keyExtractor: (item: any, index: number) => string;
     placeholder?: string;
     isLoading?: boolean;
     loadingItem?: React.ReactElement | null;
@@ -23,7 +23,7 @@ const DEBOUNCE_TIME = 450;
 
 export default function SearchInput(
     { data,
-        keyExtractor = (item) => item.id,
+        keyExtractor,
         renderItem,
         onDebounceChange, onChangeText, value,
         onBackPress,
@@ -37,7 +37,8 @@ export default function SearchInput(
     const lastEmitted = React.useRef<string>(value);
     useEffect(() => {
         // dont call onChangeText if value is the same
-        // this is the enter key can be handled without triggering onChangeText again
+        // this is so the enter key wont re-trigger onChangeText again
+        // if were already searching
         if (debouncedValue === lastEmitted.current) return;
         lastEmitted.current = debouncedValue;
         onDebounceChange(debouncedValue);
@@ -61,7 +62,7 @@ export default function SearchInput(
 
 
     return (
-        <>
+        <View style={styles.container}>
             <View style={styles.searchBar}>
                 <Entypo onPress={onBackPress} name="chevron-small-left" size={24} color="black" />
                 <Input
@@ -78,24 +79,29 @@ export default function SearchInput(
             {isLoading ? loadingItem : (
                 <FlatList
                     showsVerticalScrollIndicator={true}
+                    style={{ marginBottom: 20 }}
                     alwaysBounceVertical={false}
-                    style={styles.resultsList}
                     data={data}
                     renderItem={AnimatedRow}
                     keyExtractor={keyExtractor}
-                />)}
-        </>
+                />
+            )}
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        width: '100%',
+        alignSelf: 'stretch',
+    },
     searchBar: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         gap: 10,
         paddingHorizontal: 10,
-
+        width: '100%',
     },
     resultsList: {
         marginTop: 10,

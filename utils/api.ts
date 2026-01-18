@@ -9,7 +9,7 @@ export async function fetchSearchResults(query: string) {
     // }
     const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}?q=${encodeURIComponent(query)}`);
     if (response.ok) {
-        const data = await response.json() as Food[];
+        const data = await response.json();
         if (!data) {
             return [];
         }
@@ -20,8 +20,8 @@ export async function fetchSearchResults(query: string) {
 }
 
 
-function normalizedEntries(entries: Food[]) {
-    return entries.map(({ server_id, ...rest }) => (
-        { ...rest, food_id: server_id }
+function normalizedEntries(entries: any[]) {
+    return entries.map(({ id, ...rest }) => (
+        { ...rest, server_id: id, id: undefined }
     )) as PartialFoodEntry[];
 }

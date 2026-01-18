@@ -62,12 +62,13 @@ export default function AddScreen({ route, navigation }: Props) {
     const trimmedValue = debouncedValue.trim().toLowerCase();
     const recents = useRecents(trimmedValue);
 
+    const queryEnabled = trimmedValue.length > MINIMUM_SEARCH_LEN && recents.length < 15;
+
     useFocusEffect(
         useCallback(() => {
             const rafId = requestAnimationFrame(() => {
                 searchInputRef.current?.focus();
             });
-
             return () => {
                 cancelAnimationFrame(rafId);
                 searchInputRef.current?.blur();
@@ -76,10 +77,10 @@ export default function AddScreen({ route, navigation }: Props) {
     );
 
     // Search query
-    const { isError, isFetching, data, error } = useQuery({
+    const { isError, isFetching, isFetched, isPlaceholderData, data, error } = useQuery({
         queryKey: [trimmedValue],
         queryFn: () => fetchSearchResults(trimmedValue),
-        enabled: trimmedValue.length > MINIMUM_SEARCH_LEN && recents.length < 15,
+        enabled: queryEnabled,
         placeholderData: (prev) => {
             return prev;
         },
@@ -121,15 +122,16 @@ export default function AddScreen({ route, navigation }: Props) {
         }
     };
 
-    let showLoadingState = false;
-    if (results.length === 0 && isFetching) {
-        showLoadingState = true;
-    }
-    // showLoadingState = true; // testtest
+    const showLoadingState = queryEnabled && results.length === 0 && isFetching;
+    const showEmptyResults =
+        queryEnabled &&
+        !isFetching &&
+        !isPlaceholderData &&
+        (data?.length ?? 0) === 0;
 
     return (
-        <>
-            <View style={[styles.container, insets]}>
+        <View style={[styles.container, insets]}>
+            <View style={styles.innerContainer}>
                 <SearchInput
                     inputRef={searchInputRef}
                     data={results}
@@ -151,19 +153,14 @@ export default function AddScreen({ route, navigation }: Props) {
                             entering={FadeIn}
                             exiting={FadeOut}
                             style={{
-                                position: 'relative',
-                                top: -200,
-                                left: 0,
-                                right: 0,
                                 alignItems: 'center',
                                 justifyContent: 'center'
                             }}>
-                            {/* <Text style={{ color: colors.textSubtle }}>Loading...</Text> */}
+
                             <LottieView
                                 autoPlay
                                 ref={animation}
                                 style={{
-
                                     width: 400,
                                     height: 400,
                                 }}
@@ -174,8 +171,10 @@ export default function AddScreen({ route, navigation }: Props) {
                     }
 
                     placeholder='Search for a food..'
-                    keyExtractor={(item) => `${item.food_id}-${item.id ?? ''}`}
+                    keyExtractor={(item) => `${item.food_id ?? ''}-${item.server_id ?? ''}`}
                 />
+
+                {showEmptyResults && <NoResultsMessage />}
             </View>
             <Menu visible={modalVisible} setVisible={setModalVisible}>
                 <AddEntryMenu
@@ -184,9 +183,17 @@ export default function AddScreen({ route, navigation }: Props) {
                     closeModal={() => setModalVisible(false)}
                 />
             </Menu>
-        </>
+        </View>
     );
 }
+function NoResultsMessage() {
+    return (
+        <View style={{ width: '80%', marginTop: 20, maxWidth: 300 }}>
+            <Text style={{ color: colors.textSubtle, textAlign: 'center' }}>Could not find the item your were looking for. You may want to create your own.</Text>
+        </View>
+    )
+}
+
 
 function AutoCompleteSuggestion({ item, index, onPress, isFetching }:
     { item: any; index: number; onPress: () => void; isFetching: boolean }) {
@@ -211,6 +218,12 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         marginTop: Platform.OS === 'ios' ? 10 : 20,
+    },
+    innerContainer: {
+        maxWidth: 600,
+        width: '100%',
+        flex: 1,
+        alignItems: 'center'
     },
     suggestionContainer: {
         flex: 1,
@@ -250,7 +263,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 10,
         paddingHorizontal: '10%',
-
     },
     flatList: {
         marginTop: 10,

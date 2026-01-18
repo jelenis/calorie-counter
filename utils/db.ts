@@ -45,9 +45,7 @@ async function initialize(db: SQLite.SQLiteDatabase) {
         PRAGMA foreign_keys = ON;
         
         
-        /*DROP TABLE IF EXISTS entries;
-        DROP TABLE IF EXISTS foods;
-        DROP TABLE IF EXISTS days; */
+
         
         CREATE TABLE IF NOT EXISTS days (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -94,6 +92,10 @@ async function initialize(db: SQLite.SQLiteDatabase) {
 
 
     try {
+        await db.execAsync(`
+        DROP TABLE IF EXISTS entries;
+        DROP TABLE IF EXISTS foods;
+        DROP TABLE IF EXISTS days; `)
         await db.execAsync(sql);
     } catch (e) {
         console.error('Error during DB initialization:', e);
@@ -128,12 +130,12 @@ export async function insertEntry(
     entry: FoodEntry,
 ) {
     const db = await getDB();
-
     const dayId = await getDateId(date);
 
     // Insert food into foods table if it doesn't exist
     let result = await db.runAsync(
-        `INSERT OR IGNORE INTO foods (
+        `INSERT INTO foods (
+            id,
             server_id, 
             upc, 
             name, 
@@ -145,17 +147,22 @@ export async function insertEntry(
             protein, 
             fat, 
             carbs
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO NOTHING`,
         [
-            // if server_id already exists leave it
+
+            entry.food_id ?? null,
             entry.server_id ?? null,
             entry.upc ?? null,
+
             entry.name,
             entry.calories,
             entry.category ?? null,
+
             entry.brand ?? null,
             entry.serving_size_g ?? null,
             entry.serving_text ?? null,
+
             entry.protein ?? null,
             entry.fat ?? null,
             entry.carbs ?? null
@@ -163,20 +170,16 @@ export async function insertEntry(
     );
 
 
-    let foodId = result.lastInsertRowId;
-    if (!foodId && entry.server_id) {
-        // look up food id if it's already in the table
-        const row = await db.getFirstAsync<{ id: number }>(
-            `SELECT id FROM foods WHERE server_id = ?;`,
-            entry.server_id
-        );
-        if (row?.id == undefined) {
-            throw Error('Missing foodId after it was inserted')
-        }
-        foodId = row?.id
+
+    // look up food id 
+    let row = await db.getFirstAsync<{ id: number }>(
+        `SELECT id FROM foods WHERE server_id = ? OR id = ?`,
+        [entry.server_id, entry.food_id]
+    );
+    if (row?.id == undefined) {
+        throw Error('Missing food after it was inserted')
     }
-
-
+    const foodId = row?.id
     // upsert, will insert if id is null
     result = await db.runAsync(
         `INSERT INTO entries (
@@ -195,18 +198,34 @@ export async function insertEntry(
             entry.time
         ]
     );
-    return entry.id ?? result.lastInsertRowId;
+
+    row = await db.getFirstAsync<{ id: number }>(
+        `SELECT *
+            FROM entries
+            ORDER BY id DESC
+            LIMIT 1;`
+    );
+    if (row?.id == undefined) {
+        throw Error('Missing entry after it was inserted')
+    }
+
+    return row?.id;
 }
 
-export async function getRecents(): Promise<FoodEntry[]> {
+export async function getRecents(): Promise<Food[]> {
     const db = await getDB();
-    const foods = await db.getAllAsync<FoodEntry>(
+    let foods = await db.getAllAsync<EmptyFoodEntry>(
         `SELECT DISTINCT f.*, e.food_id FROM foods f
          JOIN entries e ON e.food_id = f.id
          GROUP BY food_id
          ORDER BY e.id DESC
          LIMIT 35;`
     );
+    // remove the id field (we want new ids to be created)
+    foods = foods.map(f => ({ ...f, id: undefined }));
+
+    console.log("returning recents...")
+    console.log(JSON.stringify(foods, null, 2))
     return foods;
 }
 
