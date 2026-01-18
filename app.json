@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Open Calorie",
+    "name": "SimpleCalorie",
     "slug": "calorie-counter",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,8 +8,6 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {

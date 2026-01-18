@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, Pressable, Keyboard } from 'react-native';
 import colors from '@styles/colors';
 import { cardShadow } from '@styles/card';
@@ -7,8 +7,11 @@ import { cardShadow } from '@styles/card';
 type Props = { title: string; children: React.ReactNode };
 
 export default function MenuCard({ title, children }: Props) {
+
+    const insets = useSafeAreaInsets();
     return (
-        <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+        <View
+            style={[styles.safeArea, { paddingTop: insets.top }]}  >
             <Pressable style={styles.container} onPress={Keyboard.dismiss}>
                 <View style={{ width: '100%', alignSelf: 'flex-start' }}>
                     <Text style={styles.titleText}>{title}</Text>
@@ -17,7 +20,7 @@ export default function MenuCard({ title, children }: Props) {
                     {children}
                 </View>
             </Pressable>
-        </SafeAreaView>
+        </View >
     );
 }
 
@@ -34,7 +37,6 @@ const styles = StyleSheet.create({
         marginTop: 10,
         width: '100%',
         maxWidth: 650,
-
     },
     innerContainer: {
         alignItems: 'flex-start',

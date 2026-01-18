@@ -8,7 +8,6 @@ import * as db from '@utils/db';
 import { RootTabParamList, UNIT_TO_GRAMS } from '@utils/types';
 import * as z from 'zod';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { SaveToast } from '@components/ui/successToast';
 import Toast from 'react-native-toast-message';
 const reg = /^(\d+(\.\d+)?)\s*(g|oz|lb)?$/i;
 const MAX_INPUT_LEN_NUM = 6
@@ -199,6 +198,7 @@ export default function CreateFoodScreen({ navigation }: Props) {
                         if (result) {
                             Toast.show({
                                 type: 'success',
+                                text1: `Added ${mealName.trim() || 'meal'} to your foods`,
                             });
                         }
                     } catch (e) {
@@ -206,7 +206,6 @@ export default function CreateFoodScreen({ navigation }: Props) {
                     }
                 }} />
             </View>
-            <SaveToast text={`Added ${mealName} to your foods`} />
         </MenuCard>
     );
 }

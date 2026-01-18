@@ -27,13 +27,14 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 import { StyleSheet, Text, View } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Query, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // react navigation
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { ModalStackParamList, RootTabParamList } from '@utils/types';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 
 // Icons
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -44,6 +45,7 @@ import AddScreen from '@screens/AddScreen';
 import GoalScreen from '@screens/GoalScreen';
 import CreateFoodScreen from '@screens/CreateFoodScreen';
 import colors from '@styles/colors';
+import { ToastHost } from '@components/ui/successToast';
 
 
 // Create a client
@@ -61,15 +63,14 @@ function TabBar() {
         tabBarActiveTintColor: colors.textPrimary,
         headerShown: false,
         popToTopOnBlur: true,
-        tabBarStyle: { alignContent: 'center', paddingTop: '2%', height: 80 },
+        tabBarStyle: { alignContent: 'center', paddingTop: 8, height: 80 },
       }}
     >
       <Tab.Screen
         name="GoalScreen"
         options={{
           tabBarLabel: 'Goals',
-          tabBarIcon: ({ focused, color, size }) => {
-
+          tabBarIcon: ({ color, size }) => {
             return <Ionicons name={'trophy'} size={size} color={color} />;
           }
         }}
@@ -79,7 +80,7 @@ function TabBar() {
         name="Home"
         component={HomeStack}
         options={{
-          tabBarIcon: ({ focused, color, size }) => {
+          tabBarIcon: ({ color, size }) => {
             return <Ionicons name={'home'} size={size} color={color} />;
           }
         }}
@@ -88,27 +89,28 @@ function TabBar() {
         name="CreateFoodScreen"
         options={{
           tabBarLabel: 'Create',
-          tabBarIcon: ({ focused, color, size }) => {
+          tabBarIcon: ({ color, size }) => {
             return <MaterialCommunityIcons name="silverware-fork-knife" size={size} color={color} />
           }
         }}
         component={CreateFoodScreen}
       />
-
     </Tab.Navigator>
   );
 }
+
 function HomeStack() {
   return (
     <ModalStack.Navigator screenOptions={{ headerShown: false }}>
-      <ModalStack.Screen name="HomeScreen"
+      <ModalStack.Screen
+        name="HomeScreen"
         options={{
           presentation: 'card',
           gestureEnabled: true,
           animationDuration: 300,
         }}
-
-        component={HomeScreen} />
+        component={HomeScreen}
+      />
       <ModalStack.Screen
         name="AddScreen"
         options={{
@@ -126,14 +128,15 @@ function HomeStack() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <SafeAreaProvider>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <StatusBar style="auto" />
         <ErrorBoundary>
-          <View style={styles.container}>
+          <GestureHandlerRootView style={styles.container}>
             <NavigationContainer>
               <TabBar />
             </NavigationContainer>
-          </View>
+            <ToastHost />
+          </GestureHandlerRootView>
         </ErrorBoundary>
       </SafeAreaProvider>
     </QueryClientProvider>

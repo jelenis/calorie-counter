@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import colors from '@styles/colors';
 
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Directions } from 'react-native-gesture-handler';
 import { scheduleOnRN } from 'react-native-worklets';
 
@@ -61,7 +61,7 @@ export default function PanelList({ panels = [], activeColors = [colors.textPrim
     const combined = Gesture.Exclusive(leftSwipe, rightSwipe);
     return (
         // stretch to full width of parent container
-        <GestureHandlerRootView style={{ margin: 0, width: '100%', }} onLayout={(e) => {
+        <View style={{ margin: 0, width: '100%', }} onLayout={(e) => {
             const w = e.nativeEvent.layout.width;
             setPanelWidth(w);
         }}>
@@ -106,7 +106,7 @@ export default function PanelList({ panels = [], activeColors = [colors.textPrim
                     transitionDuration: 400
                 }]}></Animated.View>)}
             </View>
-        </GestureHandlerRootView>
+        </View>
     );
 }
 

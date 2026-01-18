@@ -122,7 +122,7 @@ export default function AddScreen({ route, navigation }: Props) {
         }
     };
 
-    const showLoadingState = queryEnabled && results.length === 0 && isFetching;
+    let showLoadingState = queryEnabled && results.length === 0 && isFetching;
     const showEmptyResults =
         queryEnabled &&
         !isFetching &&
@@ -154,18 +154,28 @@ export default function AddScreen({ route, navigation }: Props) {
                             exiting={FadeOut}
                             style={{
                                 alignItems: 'center',
-                                justifyContent: 'center'
+                                marginTop: '30%',
+                                justifyContent: 'center',
                             }}>
-
                             <LottieView
                                 autoPlay
                                 ref={animation}
                                 style={{
-                                    width: 400,
-                                    height: 400,
+                                    width: 100,
+                                    height: 100,
                                 }}
                                 source={require('@assets/loading.json')}
                             />
+
+                            <Text style={{
+                                marginTop: 20,
+                                fontSize: 16,
+                                fontWeight: 600,
+                                color: colors.placeholder,
+
+                            }}>
+                                Searching Nutrition Facts...
+                            </Text>
 
                         </Animated.View>
                     }

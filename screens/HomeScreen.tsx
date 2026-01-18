@@ -213,7 +213,7 @@ function FakeSearchBar({ navigation, currentDate }: { navigation: any, currentDa
     return (
         <Animated.View
             style={[{
-                marginTop: 60,
+                marginTop: 20,
                 flex: 1,
                 width: '80%',
                 maxWidth: 600,
@@ -221,6 +221,15 @@ function FakeSearchBar({ navigation, currentDate }: { navigation: any, currentDa
             entering={FadeInUp}
             exiting={FadeOutDown}
         >
+            <Text style={{
+                textAlign: 'center',
+                color: colors.textPrimary,
+                fontSize: 28,
+                fontWeight: '800',
+                marginBottom: 10
+            }}>
+                SimpleCalorie
+            </Text>
             <Text style={{
                 textAlign: 'center',
                 color: colors.textPrimary,
