@@ -31,15 +31,16 @@ const MAX_INPUT_LEN_NUM = 6
 
 export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEntry, closeModal }: AddEntryMenuProps) {
     const [quantityText, setQuantityText] = React.useState('');
-    const [quantity, setQuantity] = React.useState(1);
+
     const [selectedUnit, setSelectedUnit] = React.useState<Unit>('g');
     const [time, setTime] = React.useState<MealTime>('breakfast');
     const defaultServingSize = selectedItem?.serving_size_g || 1;
-
     // Validate quantityText before calculations
     // zod for validating numeric quantity input
     const isQuantityValid = quantitySchema.safeParse(quantityText).success;
     const parsedQuantity = isQuantityValid ? parseFloat(quantityText) : 0;
+    const [quantity, setQuantity] = React.useState(selectedItem?.quantity || defaultServingSize);
+
 
     function calcNutrient(nutrient: number | undefined) {
         return isQuantityValid && nutrient !== undefined
@@ -53,38 +54,15 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
         'lb': UNIT_TO_GRAMS['lb'],
     }
     // default calories state
-    const [caloriesText, setCaloriesText] = React.useState('');
     const [calories, setCalories] = React.useState(() => {
         const cals = selectedItem?.calories || 0;
-        return defaultServingSize * cals || 0;
+        return cals * quantity || 0;
     });
-
-    useEffect(() => {
-        // keeps the calories text in sync with validated calories state
-        setCaloriesText(calories.toFixed(0));
-
-        if (selectedItem?.calories === undefined || selectedItem.calories === 0) {
-            return; // serving size is meaningless if no calories in selected item
-        }
-
-        // determine the correct serving size that would give this many calories 
-        const newServingSize = calories / selectedItem.calories;
-        setQuantity(newServingSize);
-
-        setQuantityText(newServingSize.toFixed(1));
-
-    }, [calories]);
-
-    // sync valid quantity text to numeric quantity
-    useEffect(() => {
-        if (isQuantityValid) {
-            setQuantity(parseFloat(quantityText))
-        }
-    }, [quantityText])
+    const [caloriesText, setCaloriesText] = React.useState(calories.toFixed(0));
 
     const isEditing = Boolean(deleteFoodEntry);
-
     const navigation = useNavigation();
+
     // set a default serving size when selectedItem changes, only on new entry
     useEffect(() => {
         if (selectedItem?.serving_text && selectedItem.serving_size_g) {
@@ -135,6 +113,7 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                             <TextInput style={[styles.nutrientValue, styles.calories]}
                                 value={caloriesText}
                                 onChangeText={setCaloriesText}
+                                returnKeyType='done'
                                 keyboardType="number-pad"
                                 maxLength={MAX_INPUT_LEN_NUM}
                                 onBlur={() => {
@@ -143,7 +122,15 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                                         setCaloriesText(calories.toFixed(0));
                                         return;
                                     }
-                                    setCalories(prev => parseFloat(caloriesText));
+                                    setCalories(parsed);
+                                    // determine the quantity that would give this many calories 
+                                    if (!selectedItem?.calories || selectedItem.calories === 0) {
+                                        return;
+                                    }
+                                    // grams = cals / (cals per gram)
+                                    const newQuantity = parsed / selectedItem.calories;
+                                    setQuantity(newQuantity);
+                                    setQuantityText(newQuantity.toFixed(1));
                                 }} />
                         </View>
                         <View style={[styles.nutrientRow, styles.oddRow]}>
@@ -180,6 +167,7 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                     <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 30, }}>
                         <View>
                             <Input
+                                returnKeyType='done'
                                 keyboardType='number-pad'
                                 maxLength={MAX_INPUT_LEN_NUM}
                                 onSubmitEditing={Keyboard.dismiss}
@@ -191,6 +179,14 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                                     setQuantityText(text);
                                     setQuantity(value);
                                 }}
+                                onBlur={() => {
+                                    // determine the correct calories 
+                                    // cals = (cals per gram) * grams
+                                    const newQuantity = parseFloat(quantityText);
+                                    const newCals = selectedItem.calories * newQuantity;
+                                    setCaloriesText(newCals.toFixed(0));
+                                    setCalories(newCals);
+                                }}
                             />
                         </View>
                         <View style={styles.servingSizePickerContainer}>
@@ -200,14 +196,11 @@ export default function AddEntryMenu({ selectedItem, addFoodEntry, deleteFoodEnt
                                 valueField="value"
                                 placeholder="Select item"
                                 selectedTextStyle={{ color: colors.textSubtle, }}
-
                                 searchPlaceholder="Search..."
                                 value={selectedUnit}
                                 onChange={item => {
                                     const newUnit = item.value as Unit;
                                     const prevUnit = selectedUnit;
-
-
                                     // nomralize to grams and convert to new unit
                                     const newQuantity = (quantity * conversionMap[prevUnit]) / conversionMap[newUnit];
                                     setQuantity(newQuantity);

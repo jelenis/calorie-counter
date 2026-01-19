@@ -4,7 +4,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native';
 import { FlatList } from 'react-native-gesture-handler';
 
-import { THIRD_PARTY_LICENSES } from '../thirdPartyLicenses';
+import THIRD_PARTY_LICENSES from '../thirdPartyLicenses';
 
 export default function ThirdPartyLicensesScreen() {
     const navigation = useNavigation<any>();

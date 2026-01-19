@@ -20,7 +20,7 @@ import MacroPanel from '@components/ui/MacroPanel'
 
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 import { cardShadow, inputCard } from '@styles/card';
-
+import Logo from "@assets/logo.svg";
 
 type SectionProp = {
     time: string;
@@ -157,8 +157,6 @@ export default function HomeScreen({ navigation, params }: { navigation: any; pa
                 forwardDisabled={currentDate < new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())}
                 date={currentDate} />
 
-
-
             {hasEntries ? (
                 <>
                     <MacroPanel
@@ -222,15 +220,24 @@ function FakeSearchBar({ navigation, currentDate }: { navigation: any, currentDa
             entering={FadeInUp}
             exiting={FadeOutDown}
         >
-            <Text style={{
-                textAlign: 'center',
-                color: colors.textPrimary,
-                fontSize: 28,
-                fontWeight: '800',
-                marginBottom: 10
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                marginBottom: 10,
             }}>
-                SimpleCalorie
-            </Text>
+                <Text style={{
+                    textAlign: 'center',
+                    color: colors.textPrimary,
+                    fontSize: 28,
+                    fontWeight: '800',
+                }}>
+                    SimpleCalorie
+                </Text>
+                <Logo style={{ marginBottom: 8 }} width={50} height={50} />
+            </View>
+
             <Text style={{
                 textAlign: 'center',
                 color: colors.textPrimary,

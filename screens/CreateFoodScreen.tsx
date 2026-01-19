@@ -36,23 +36,27 @@ const userFooodSchema = z.object({
 
 type Props = BottomTabScreenProps<RootTabParamList, 'CreateFoodScreen'>;
 export default function CreateFoodScreen({ navigation }: Props) {
-    const [calorieText, setCalorieText] = useState('');
-    const [proteinText, setProteinText] = useState('');
-    const [carbsText, setCarbsText] = useState('');
-    const [fatText, setFatText] = useState('');
-    const [mealName, setMealName] = useState('');
-    const [brandName, setBrandName] = useState('');
-    const [servingSize, setServingSize] = useState('1 g');
+    const initialForm = {
+        calorieText: '',
+        proteinText: '',
+        carbsText: '',
+        fatText: '',
+        mealName: '',
+        brandName: '',
+        servingSize: '1 g',
+    };
+
+    const [form, setForm] = useState(initialForm);
 
     async function saveFood() {
         const food = {
-            name: mealName.trim(),
-            brand: brandName.trim() || null,
-            calories: parseInt(calorieText),
-            protein: proteinText || null,
-            fat: fatText || null,
-            carbs: carbsText || null,
-            servingSize: servingSize.trim() || null,
+            name: form.mealName.trim(),
+            brand: form.brandName.trim() || null,
+            calories: parseInt(form.calorieText),
+            protein: form.proteinText || null,
+            fat: form.fatText || null,
+            carbs: form.carbsText || null,
+            servingSize: form.servingSize.trim() || null,
         };
 
         // Validate input
@@ -77,7 +81,7 @@ export default function CreateFoodScreen({ navigation }: Props) {
             fat: validFood.fat * servingSizeFactor,
             carbs: validFood.carbs * servingSizeFactor,
             serving_size_g: servingSizeFactor,
-            serving_text: servingSize,
+            serving_text: form.servingSize,
             category: null, // User foods have no category
             time: 'snack'
         };
@@ -90,8 +94,8 @@ export default function CreateFoodScreen({ navigation }: Props) {
             <View style={{ width: '80%', flexDirection: 'row', alignItems: 'center' }}>
                 <TextInput
                     maxLength={MAX_INPUT_LEN_STR}
-                    value={mealName}
-                    onChangeText={setMealName}
+                    value={form.mealName}
+                    onChangeText={(t) => setForm(prev => ({ ...prev, mealName: t }))}
                     style={styles.mealName}
                     placeholder="Fuji Apple" />
             </View>
@@ -99,8 +103,8 @@ export default function CreateFoodScreen({ navigation }: Props) {
             <View style={{ width: '80%', flexDirection: 'row', alignItems: 'center' }}>
                 <TextInput
                     maxLength={MAX_INPUT_LEN_STR}
-                    value={brandName}
-                    onChangeText={setBrandName}
+                    value={form.brandName}
+                    onChangeText={(t) => setForm(prev => ({ ...prev, brandName: t }))}
                     style={styles.brandName}
                     placeholder="Healthy Choice Inc" />
             </View>
@@ -108,17 +112,17 @@ export default function CreateFoodScreen({ navigation }: Props) {
             <View style={{ width: 100, flexDirection: 'row', alignItems: 'center' }}>
                 <TextInput
                     maxLength={MAX_INPUT_LEN_NUM}
-                    value={servingSize}
-                    onChangeText={setServingSize}
+                    value={form.servingSize}
+                    onChangeText={(t) => setForm(prev => ({ ...prev, servingSize: t }))}
                     style={styles.servingSize}
                     onBlur={() => {
-                        const parsed = servingSizeSchema.safeParse(servingSize);
+                        const parsed = servingSizeSchema.safeParse(form.servingSize);
                         if (parsed.success) {
                             const { unit, value } = parsed.data;
-                            setServingSize(`${value} ${unit || 'g'}`);
+                            setForm(prev => ({ ...prev, servingSize: `${value} ${unit || 'g'}` }));
                         } else {
-                            const val = parseFloat(servingSize);
-                            setServingSize(isNaN(val) ? '1 g' : val + ' g');
+                            const val = parseFloat(form.servingSize);
+                            setForm(prev => ({ ...prev, servingSize: isNaN(val) ? '1 g' : val + ' g' }));
                         }
                     }} />
             </View>
@@ -138,8 +142,8 @@ export default function CreateFoodScreen({ navigation }: Props) {
                             <TextInput
                                 maxLength={MAX_INPUT_LEN_NUM}
                                 style={styles.nutrientValue}
-                                value={calorieText}
-                                onChangeText={setCalorieText}
+                                value={form.calorieText}
+                                onChangeText={(t) => setForm(prev => ({ ...prev, calorieText: t }))}
                                 keyboardType="numeric"
                                 placeholder='90'
                             />
@@ -152,8 +156,8 @@ export default function CreateFoodScreen({ navigation }: Props) {
                             <TextInput
                                 maxLength={MAX_INPUT_LEN_NUM}
                                 style={styles.nutrientValue}
-                                value={proteinText}
-                                onChangeText={setProteinText}
+                                value={form.proteinText}
+                                onChangeText={(t) => setForm(prev => ({ ...prev, proteinText: t }))}
                                 keyboardType="numeric"
                                 placeholder='0'
                             />
@@ -166,8 +170,8 @@ export default function CreateFoodScreen({ navigation }: Props) {
                             <TextInput
                                 maxLength={MAX_INPUT_LEN_NUM}
                                 style={styles.nutrientValue}
-                                value={fatText}
-                                onChangeText={setFatText}
+                                value={form.fatText}
+                                onChangeText={(t) => setForm(prev => ({ ...prev, fatText: t }))}
                                 keyboardType="numeric"
                                 placeholder='0'
                             />
@@ -180,8 +184,8 @@ export default function CreateFoodScreen({ navigation }: Props) {
                             <TextInput
                                 maxLength={MAX_INPUT_LEN_NUM}
                                 style={styles.nutrientValue}
-                                value={carbsText}
-                                onChangeText={setCarbsText}
+                                value={form.carbsText}
+                                onChangeText={(t) => setForm(prev => ({ ...prev, carbsText: t }))}
                                 keyboardType="numeric"
                                 placeholder='0'
                             />
@@ -198,8 +202,9 @@ export default function CreateFoodScreen({ navigation }: Props) {
                         if (result) {
                             Toast.show({
                                 type: 'success',
-                                text1: `Added ${mealName.trim() || 'meal'} to your foods`,
+                                text1: `Added ${form.mealName.trim() || 'meal'} to your foods`,
                             });
+                            setForm(initialForm);
                         }
                     } catch (e) {
                         console.error(e)
@@ -209,12 +214,7 @@ export default function CreateFoodScreen({ navigation }: Props) {
         </MenuCard>
     );
 }
-
-
-
-
 const styles = StyleSheet.create({
-
     buttonContainer: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
@@ -224,7 +224,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height: 40,
         paddingHorizontal: 20,
-
     },
     title: {
         fontSize: 16,
