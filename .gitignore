@@ -44,3 +44,4 @@ credentials.json
 
 
 *.ipa
+certs/

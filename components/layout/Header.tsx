@@ -17,35 +17,39 @@ export default function Header({ onBackPress, onForwardPress, date, forwardDisab
             <Pressable style={styles.dateContainer}>
                 <Entypo onPress={onBackPress} name="chevron-small-left" size={24} color="black" />
                 <Text style={styles.title}>{dateString}</Text>
-                <View style={styles.spacer} />
+
                 {!forwardDisabled ? null : <Entypo onPress={onForwardPress} name="chevron-small-right" size={24} color="black" />}
-                {!onAboutPress ? null : (
-                    <Entypo onPress={onAboutPress} name="info-with-circle" size={20} color={colors.placeholder} style={{ marginRight: 12 }} />
-                )}
             </Pressable>
+            <View >
+                {!onAboutPress ? null : (
+                    <Entypo onPress={onAboutPress} name="info-with-circle" size={20} color={colors.placeholder} style={{ marginRight: 22 }} />
+                )}
+            </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
-        width: '100%',
+        paddingHorizontal: 12,
         marginBottom: '10%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'stretch',
+        justifyContent: 'space-between'
     },
     dateContainer: {
         padding: 5,
-        width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-start',
         gap: 10,
+
     },
     title: {
         color: colors.textSecondary,
         fontSize: 20,
         fontWeight: 'bold',
     },
-    spacer: {
-        flex: 1,
-    },
+
 })
